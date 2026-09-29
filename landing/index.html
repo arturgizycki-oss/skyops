@@ -35,14 +35,23 @@ body {
 
 /* ---------- header ---------- */
 .topbar-right { display: flex; align-items: center; gap: 16px; }
-.lang-land { display: inline-flex; border: 1px solid rgba(255,255,255,.28); border-radius: 3px; overflow: hidden; }
-.lang-land button {
-  font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em;
-  padding: 3px 8px; border: 0; cursor: pointer;
-  background: transparent; color: rgba(255,255,255,.7);
+.lang-land {
+  display: inline-flex;
+  border: 1px solid var(--line-strong, #a9bfcc);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #fff;
 }
-.lang-land button + button { border-left: 1px solid rgba(255,255,255,.2); }
-.lang-land button.on { background: #fff; color: #132430; }
+.lang-land button {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px; font-weight: 500; letter-spacing: .08em;
+  padding: 4px 10px; border: 0; cursor: pointer;
+  background: #fff; color: var(--slate, #5b7284);
+  transition: background .15s, color .15s;
+}
+.lang-land button:hover { background: #eaf1f5; color: var(--ink, #132430); }
+.lang-land button + button { border-left: 1px solid var(--line, #cfdde5); }
+.lang-land button.on { background: var(--ink, #132430); color: #fff; }
 .topbar-wrap {
   position: sticky; top: 0; z-index: 50;
   background: rgba(243, 247, 249, .72);
