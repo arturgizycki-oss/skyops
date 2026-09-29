@@ -39,8 +39,16 @@ class FlightRecorder:
         self._last_sample: dict[str, float] = {}
 
     def tick(self, drones, detections: dict[str, int],
-             mode: str = "search") -> None:
-        """Call ~1x/second with current drone objects and AI counts."""
+             mode: str = "search",
+             statuses: dict[str, str] | None = None) -> None:
+        """Call ~1x/second with current drone objects and AI counts.
+
+        `statuses` maps a detection label to the operator's verdict
+        (pending / confirmed / rejected). It is re-applied on every tick,
+        because an operator usually confirms a finding some seconds after
+        the system first reported it.
+        """
+        statuses = statuses or {}
         now = time.time()
         for d in drones:
             t = d.telemetry()
@@ -82,8 +90,14 @@ class FlightRecorder:
                                 "t": round(now - rec["start"], 1),
                                 "label": label, "count": count,
                                 "lat": t["lat"], "lon": t["lon"],
+                                "status": statuses.get(label, "pending"),
                             })
                     rec["_prev_counts"] = dict(detections)
+
+                # a verdict usually arrives after the event was logged
+                for ev in rec["events"]:
+                    if ev["label"] in statuses:
+                        ev["status"] = statuses[ev["label"]]
 
                 if not flying:
                     rec["end"] = now
@@ -304,9 +318,18 @@ def render_sitrep(rec: dict) -> bytes:
         text = (f"Flood water observed; peak measured coverage in frame "
                 f"{max(e['count'] for e in rec.get('events', [{'count': dets['water %']}]))}%.")
     elif dets:
-        parts = ", ".join(f"{k} ({v} obj-s)" for k, v in
-                          sorted(dets.items(), key=lambda kv: -kv[1]))
-        text = f"AI-confirmed observations during sortie: {parts}."
+        ev = rec.get("events", [])
+        ok = sorted({e["label"] for e in ev
+                     if e.get("status") == "confirmed"})
+        na = sorted({e["label"] for e in ev
+                     if e.get("status", "pending") == "pending"})
+        bits = []
+        if ok:
+            bits.append("Operator-confirmed: " + ", ".join(ok))
+        if na:
+            bits.append("reported by AI, not yet confirmed: " + ", ".join(na))
+        text = ("; ".join(bits) + "." if bits else
+                "Detections recorded; none adjudicated by the operator.")
     else:
         text = "No AI detections during this sortie."
     import textwrap
@@ -317,19 +340,33 @@ def render_sitrep(rec: dict) -> bytes:
     # detection timeline
     y3 = y2 - 44 - (14 if len(lines) > 1 else 0)
     label(m, y3, "Detection timeline / Os czasu wykryc")
-    events = rec.get("events", [])[:14]
+    _rank = {"confirmed": 0, "pending": 1, "rejected": 2}
+    events = sorted(rec.get("events", []),
+                    key=lambda e: _rank.get(e.get("status", "pending"), 1)
+                    )[:14]
     c.setFont("Courier", 9)
     yy = y3 - 14
     if not events:
         c.setFillColor(SLATE)
         c.drawString(m, yy, "(no events)")
         yy -= 12
+    _mark = {"confirmed": "[POTWIERDZONE]", "rejected": "[ODRZUCONE]  ",
+             "pending": "[NIEPOTW. AI] "}
     for e in events:
-        c.setFillColor(INK)
-        line = (f"T+{e['t']:>6.1f}s  {e['label']:<14} x{e['count']:<3} "
+        st = e.get("status", "pending")
+        c.setFillColor(colors.HexColor("#148a5c") if st == "confirmed"
+                       else SLATE if st == "rejected" else INK)
+        line = (f"{_mark.get(st, _mark['pending'])} T+{e['t']:>6.1f}s  "
+                f"{e['label']:<13} x{e['count']:<3} "
                 f"@ {e['lat']:.5f}, {e['lon']:.5f}")
         c.drawString(m, yy, line)
         yy -= 12
+    c.setFillColor(SLATE)
+    c.setFont("Courier", 7.5)
+    c.drawString(m, yy - 2,
+                 "POTWIERDZONE = operator potwierdzil / operator confirmed."
+                 "  NIEPOTW. AI = tylko wskazanie AI / AI only.")
+    yy -= 14
 
     # route sketch (compact)
     box_h = 55 * mm

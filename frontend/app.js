@@ -598,14 +598,45 @@ document.querySelectorAll(".mode-btn").forEach(btn => {
 
 /* --- AI alerts feed --- */
 
+// An alert is a proposal, not a fact. The operator adjudicates it, and
+// only that verdict is carried into the Situation Report.
+async function setAlertStatus(id, status) {
+  await api(`/api/alerts/${id}/status`, { status });
+  refreshAlerts();
+}
+
+function alertAge(ts) {
+  const s = Math.max(0, Math.round(Date.now() / 1000 - ts));
+  if (s < 60) return `${s} s temu`;
+  return `${Math.round(s / 60)} min temu`;
+}
+
 async function refreshAlerts() {
   try {
     const alerts = await (await fetch("/api/alerts")).json();
     const el = document.getElementById("alerts");
     el.innerHTML = alerts.slice(0, 12).map(a => {
       const t = new Date(a.ts * 1000).toLocaleTimeString();
-      return `<div class="alert-row"><span class="t">${t}</span>
-        ${a.label} detected (x${a.count})</div>`;
+      const st = a.status || "pending";
+      // a confidence is a classifier's own certainty; flood coverage is a
+      // measurement, so it is labelled as one instead of faking a score
+      const conf = a.conf == null
+        ? `<span class="conf meas">pomiar</span>`
+        : `<span class="conf">${Math.round(a.conf * 100)}%</span>`;
+      const controls = (VIEWER || st !== "pending") ? "" : `
+        <span class="adj">
+          <button class="ok" onclick="setAlertStatus(${a.id},'confirmed')">potwierdz</button>
+          <button class="no" onclick="setAlertStatus(${a.id},'rejected')">odrzuc</button>
+        </span>`;
+      const verdict = st === "confirmed"
+        ? `<span class="verdict ok">potwierdzone</span>`
+        : st === "rejected" ? `<span class="verdict no">odrzucone</span>` : "";
+      return `<div class="alert-row st-${st}">
+        <div class="ar-main"><span class="t">${t}</span>
+          <span class="lab">${a.label} (x${a.count})</span> ${conf}</div>
+        <div class="ar-sub"><span class="age">${alertAge(a.ts)}</span>
+          ${verdict}${controls}</div>
+      </div>`;
     }).join("");
   } catch { /* backend not ready */ }
 }
@@ -823,3 +854,81 @@ async function initSwarm() {
 }
 
 initSwarm();
+
+/* --- IMGW river gauges: the trigger, and the other half of the uncertainty ---
+   A gauge is authoritative about water level and blind about extent. It is
+   what starts a sortie; the drone answers the question it raises. */
+
+const hydroState = { markers: {}, seen: false };
+const HYDRO_COLOR = {
+  "alarmowy": "#c0392b",
+  "ostrzegawczy": "#9a6200",
+  "norma": "#148a5c",
+  "brak progow": "#8ba0ac",
+};
+
+function hydroIcon(st, simulated) {
+  const c = HYDRO_COLOR[st] || HYDRO_COLOR["brak progow"];
+  return L.divIcon({
+    className: "hydro-icon",
+    html: `<svg width="18" height="18" viewBox="0 0 18 18">
+      <rect x="2" y="2" width="14" height="14" rx="2"
+        fill="${c}" stroke="${simulated ? '#132430' : '#ffffff'}"
+        stroke-width="${simulated ? 2.5 : 1.5}"
+        stroke-dasharray="${simulated ? '3 2' : ''}"/>
+      <path d="M5 11 q4 -4 8 0" stroke="#fff" stroke-width="1.6" fill="none"/>
+    </svg>`,
+    iconSize: [18, 18], iconAnchor: [9, 9],
+  });
+}
+
+async function refreshHydro() {
+  try {
+    const p = await (await fetch("/api/hydro")).json();
+    const sum = document.getElementById("hydro-summary");
+    const list = document.getElementById("hydro-list");
+    if (!sum || !list) return;
+
+    if (p.error && !p.stations.length) {
+      sum.textContent = "Brak polaczenia z IMGW - pracujemy na danych z drona.";
+      return;
+    }
+
+    const c = p.counts || {};
+    const alarm = c["alarmowy"] || 0, warn = c["ostrzegawczy"] || 0;
+    sum.innerHTML = `${p.stations.length} wodowskazow &middot; `
+      + `<b style="color:${HYDRO_COLOR['alarmowy']}">${alarm} alarm</b> &middot; `
+      + `<b style="color:${HYDRO_COLOR['ostrzegawczy']}">${warn} ostrzegawczy</b>`
+      + (p.age_s != null ? ` &middot; dane sprzed ${Math.round(p.age_s / 60)} min` : "");
+
+    // only the ones an officer would act on
+    const hot = p.stations.filter(s => s.status === "alarmowy" || s.status === "ostrzegawczy");
+    list.innerHTML = hot.length ? hot.map(s => `
+      <div class="hydro-row ${s.status}">
+        <b>${s.name}</b> <span class="river">${s.river || ""}</span>
+        <span class="lvl">${s.level_cm} cm</span>
+        <span class="thr">alarm ${s.alarm_cm}</span>
+        ${s.simulated ? '<span class="sim">SYMULACJA</span>' : ""}
+      </div>`).join("")
+      : `<span class="hint">Wszystkie wodowskazy w normie.</span>`;
+
+    for (const s of p.stations) {
+      const key = String(s.id);
+      const tip = `${s.name} (${s.river || "-"})<br>stan ${s.level_cm} cm`
+        + `<br>ostrzegawczy ${s.warn_cm} / alarmowy ${s.alarm_cm}`
+        + (s.simulated ? "<br><b>SYMULACJA</b>" : "")
+        + `<br><span style="opacity:.7">IMGW ${s.measured_at || ""}</span>`;
+      if (!hydroState.markers[key]) {
+        hydroState.markers[key] = L.marker([s.lat, s.lon], {
+          icon: hydroIcon(s.status, s.simulated),
+        }).addTo(map).bindTooltip(tip, { direction: "top" });
+      } else {
+        hydroState.markers[key].setIcon(hydroIcon(s.status, s.simulated));
+        hydroState.markers[key].setTooltipContent(tip);
+      }
+    }
+  } catch { /* backend not ready */ }
+}
+
+refreshHydro();
+setInterval(refreshHydro, 30000);

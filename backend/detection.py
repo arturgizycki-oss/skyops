@@ -59,6 +59,7 @@ class VideoDetector:
         self.detections: dict[str, int] = {}
         self.alerts: deque = deque(maxlen=100)
         self._alert_cooldown: dict[str, float] = {}
+        self._alert_seq = 0
         self.mode = "search"
         self._pending_mode: str | None = None
         self.model = None
@@ -89,10 +90,51 @@ class VideoDetector:
                 self._models[weights] = None
         return self._models[weights]
 
-    def _alert(self, label: str, count: int, now: float) -> None:
+    def _alert(self, label: str, count: int, now: float,
+               conf: float | None = None) -> None:
+        """Record a detection.
+
+        `conf` is the model's own confidence (0-1) for a classification, or
+        None for a measurement like flood coverage, where a percentage of
+        ground covered is not the same kind of quantity as a confidence.
+        Every alert starts `pending`: the operator confirms or rejects it,
+        and only that decision is treated as established fact downstream.
+        """
         if now - self._alert_cooldown.get(label, 0) > 10:
             self._alert_cooldown[label] = now
-            self.alerts.appendleft({"ts": now, "label": label, "count": count})
+            self._alert_seq += 1
+            self.alerts.appendleft({
+                "id": self._alert_seq,
+                "ts": now,
+                "label": label,
+                "count": count,
+                "conf": round(conf, 3) if conf is not None else None,
+                "status": "pending",
+            })
+
+    def set_alert_status(self, alert_id: int, status: str) -> bool:
+        """Operator adjudicates one alert. Returns False if it is gone."""
+        if status not in ("pending", "confirmed", "rejected"):
+            return False
+        with self._lock:
+            for a in self.alerts:
+                if a.get("id") == alert_id:
+                    a["status"] = status
+                    return True
+        return False
+
+    def confirmed_labels(self) -> dict[str, str]:
+        """label -> worst-case status, for the flight log and the report."""
+        out: dict[str, str] = {}
+        with self._lock:
+            for a in self.alerts:
+                st = a.get("status", "pending")
+                prev = out.get(a["label"])
+                if prev == "confirmed":
+                    continue
+                if prev is None or st == "confirmed":
+                    out[a["label"]] = st
+        return out
 
     def _flood_annotate(self, frame):
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -119,8 +161,10 @@ class VideoDetector:
                     cv2.LINE_AA)
         return frame, coverage
 
-    def _yolo_annotate(self, frame, model, conf: float) -> dict:
+    def _yolo_annotate(self, frame, model, conf: float):
+        """Returns (counts, best_conf_per_label)."""
         counts: dict[str, int] = {}
+        best: dict[str, float] = {}
         results = model.predict(frame, imgsz=INFER_WIDTH, conf=conf,
                                 verbose=False)
         for box in results[0].boxes:
@@ -128,6 +172,7 @@ class VideoDetector:
             label = model.names[int(box.cls[0])]
             c = float(box.conf[0])
             counts[label] = counts.get(label, 0) + 1
+            best[label] = max(best.get(label, 0.0), c)
             cv2.rectangle(frame, (x1, y1), (x2, y2), BOX_COLOR, 2)
             tag = f"{label} {c:.0%}"
             (tw, th), _ = cv2.getTextSize(tag, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
@@ -136,7 +181,7 @@ class VideoDetector:
             cv2.putText(frame, tag, (x1 + 3, y1 - 5),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, LABEL_COLOR, 1,
                         cv2.LINE_AA)
-        return counts
+        return counts, best
 
     def _run(self) -> None:
         cap = None
@@ -174,14 +219,14 @@ class VideoDetector:
                 counts = {"water %": round(coverage * 100)}
                 with self._lock:
                     if coverage * 100 >= FLOOD_ALERT_PCT:
-                        self._alert("flood water", round(coverage * 100), now)
+                        self._alert("flood water", round(coverage * 100), now, None)
             elif model is not None:
-                counts = self._yolo_annotate(frame, model, cfg["conf"])
+                counts, best = self._yolo_annotate(frame, model, cfg["conf"])
                 with self._lock:
                     prev = self.detections
                     for label, count in counts.items():
                         if count > prev.get(label, 0):
-                            self._alert(label, count, now)
+                            self._alert(label, count, now, best.get(label))
 
             ok, jpeg = cv2.imencode(".jpg", frame,
                                     [cv2.IMWRITE_JPEG_QUALITY, 80])

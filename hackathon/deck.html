@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<title>SkyOps - Dual Use Hackathon 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f3f7f9; --panel:#fff; --ink:#132430; --soft:#3c5364;
+    --slate:#5b7284; --line:#cfdde5; --strong:#a9bfcc;
+    --blue:#0f62e6; --blue-soft:#dce9fd; --magenta:#c22e6f;
+    --green:#148a5c; --green-soft:#d9f0e6; --amber:#9a6200; --red:#c0392b;
+  }
+  @page{ size:33.87cm 19.05cm; margin:0; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ background:var(--paper); font-family:"Source Sans 3",system-ui,sans-serif; color:var(--ink); }
+
+  .slide{
+    width:33.87cm; height:19.05cm; padding:1.5cm 2cm 1.1cm;
+    page-break-after:always; break-after:page;
+    position:relative; display:flex; flex-direction:column;
+    background:var(--paper); overflow:hidden;
+  }
+  .slide:last-child{ page-break-after:auto; }
+  .slide::before{
+    content:""; position:absolute; top:0; left:0; right:0; height:5px;
+    background:linear-gradient(90deg,var(--blue) 0 38%,var(--magenta) 38% 52%,var(--ink) 52% 100%);
+  }
+  .num{
+    position:absolute; right:2cm; bottom:.75cm;
+    font-family:"IBM Plex Mono",monospace; font-size:11pt; color:var(--strong);
+  }
+  .mark{
+    position:absolute; left:2cm; bottom:.75cm;
+    font-family:"IBM Plex Mono",monospace; font-size:10pt;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--strong);
+  }
+  .kicker{
+    font-family:"IBM Plex Mono",monospace; font-size:11pt;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--blue);
+    margin-bottom:.35cm;
+  }
+  h1{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:62pt; line-height:.95; letter-spacing:-.01em; }
+  h2{ font-family:"Barlow Condensed",sans-serif; font-weight:600; font-size:36pt; line-height:1.02; margin-bottom:.5cm; }
+  .lead{ font-size:17pt; line-height:1.45; color:var(--soft); max-width:26cm; }
+  .big{ font-family:"Barlow Condensed",sans-serif; font-weight:700; font-size:44pt; line-height:1.05; }
+
+  table{ border-collapse:collapse; width:100%; font-size:13.5pt; }
+  th{
+    font-family:"IBM Plex Mono",monospace; font-size:10pt; font-weight:500;
+    letter-spacing:.1em; text-transform:uppercase; color:var(--slate);
+    text-align:left; padding:.22cm .3cm; border-bottom:2px solid var(--strong);
+  }
+  td{ padding:.26cm .3cm; border-bottom:1px solid var(--line); vertical-align:top; }
+  td strong{ color:var(--ink); }
+
+  .cols{ display:flex; gap:1cm; flex:1; }
+  .col{ flex:1; }
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--blue);
+    border-radius:3px; padding:.55cm .65cm; margin-bottom:.4cm;
+  }
+  .card.mag{ border-left-color:var(--magenta); }
+  .card.grn{ border-left-color:var(--green); }
+  .card h3{ font-family:"Barlow Condensed",sans-serif; font-size:21pt; font-weight:600; margin-bottom:.12cm; }
+  .card p{ font-size:13pt; color:var(--soft); line-height:1.4; }
+
+  .shot{ border:1px solid var(--strong); border-radius:3px; width:100%; display:block; }
+  .flow{
+    display:flex; align-items:stretch; gap:.18cm; margin:.5cm 0;
+    font-family:"IBM Plex Mono",monospace; font-size:9.5pt;
+  }
+  .step{
+    flex:1; background:var(--panel); border:1px solid var(--line);
+    border-radius:3px; padding:.3cm .18cm; text-align:center; line-height:1.3;
+  }
+  .step b{ display:block; font-size:13pt; color:var(--blue); font-weight:500; }
+  .step.hot{ background:var(--blue-soft); border-color:var(--blue); }
+  .step.hot b{ color:var(--ink); }
+  .note{
+    font-family:"IBM Plex Mono",monospace; font-size:10.5pt; color:var(--slate);
+    border-top:1px solid var(--line); padding-top:.3cm; margin-top:auto;
+  }
+  .tag{
+    display:inline-block; font-family:"IBM Plex Mono",monospace; font-size:9pt;
+    letter-spacing:.08em; text-transform:uppercase; padding:2px 7px;
+    border:1px solid var(--strong); border-radius:2px; color:var(--slate);
+  }
+  .yes{ color:var(--green); font-weight:600; }
+  .band{
+    position:absolute; top:5px; right:0; bottom:0; width:11cm;
+    background-size:cover; background-position:center;
+  }
+  .band::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(90deg,var(--paper) 0%,rgba(243,247,249,.55) 28%,rgba(19,36,48,.10) 100%);
+  }
+  .band-bottom{
+    position:absolute; left:0; right:0; bottom:0; height:5.6cm;
+    background-size:cover; background-position:center 62%;
+  }
+  .band-bottom::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(180deg,var(--paper) 0%,rgba(243,247,249,.6) 45%,rgba(19,36,48,.18) 100%);
+  }
+  .above{ position:relative; z-index:2; }
+  .no{ color:var(--red); font-weight:600; }
+</style>
+</head>
+<body>
+
+<!-- 1 -->
+<section class="slide">
+  <div class="band" style="background-image:url(img/clip7.jpg)"></div>
+  <div class="kicker above">Dual Use Hackathon &middot; Jasionka 2026</div>
+  <h1 class="above">SkyOps</h1>
+  <p class="big above" style="color:var(--blue);margin-top:.35cm">Od problemu do informacji w działaniu</p>
+  <p class="lead above" style="margin-top:.7cm;max-width:19cm">
+    Platforma dowodzenia flotą dronów dla zarządzania kryzysowego.<br>
+    Nie makieta — system działa i jest dostępny publicznie.
+  </p>
+  <div class="above" style="margin-top:auto;display:flex;gap:1.2cm;align-items:flex-end">
+    <div>
+      <div class="kicker" style="margin-bottom:.15cm">Zespół</div>
+      <div style="font-size:19pt;font-weight:600">SkyOps</div>
+    </div>
+    <div>
+      <div class="kicker" style="margin-bottom:.15cm">Skład zespołu</div>
+      <div style="font-size:17pt;font-weight:600;line-height:1.3">Artur Giżycki &middot; Jan Pieprzycki<br><span style="font-size:14pt;font-weight:400;color:var(--soft)">+ partner techniczny (zdalnie)</span></div>
+    </div>
+    <div style="margin-left:auto;text-align:right">
+      <div class="kicker" style="margin-bottom:.15cm">Demo na żywo</div>
+      <div style="font-size:21pt;font-weight:600;color:var(--blue)">getskyops.com</div>
+    </div>
+  </div>
+  <div class="mark">SkyOps</div><div class="num">01</div>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <div class="kicker">Problem</div>
+  <h2>Za mało informacji. Zły dostęp.<br>Zła dystrybucja danych.</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card"><h3>Za mało informacji</h3>
+        <p>Oficer dyżurny nie wie, co dzieje się 3 km dalej. Dane z powietrza istnieją — przetłumaczona odpowiedź nie.</p></div>
+      <div class="card mag"><h3>Zły dostęp</h3>
+        <p>Obraz z drona widzi jedna osoba przy jednym laptopie. Sztab czeka na telefon.</p></div>
+      <div class="card grn"><h3>Zła dystrybucja</h3>
+        <p>Materiał trafia do innej służby po godzinach — albo wcale.</p></div>
+    </div>
+    <div class="col" style="display:flex;flex-direction:column;justify-content:center">
+      <p class="lead" style="font-size:19pt">
+        Tak wygląda to o trzeciej w nocy podczas powodzi:<br><br>
+        <strong style="color:var(--ink)">oficer dyżurny dzwoni do sołtysów, żeby dowiedzieć się, która droga jest jeszcze przejezdna.</strong><br><br>
+        Zanim dostanie odpowiedź, jest już nieaktualna.
+      </p>
+    </div>
+  </div>
+  <div class="mark">SkyOps</div><div class="num">02</div>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <div class="kicker">Dla kogo projektujemy</div>
+  <h2>Oficer dyżurny PSP — poziom powiatu</h2>
+  <div class="cols">
+    <div class="col">
+      <table>
+        <tr><th>Jego potrzeba</th><th>Dziś</th><th>U nas</th></tr>
+        <tr><td><strong>Które drogi przejezdne</strong></td><td>telefony, godziny</td><td>mapa, 20 minut</td></tr>
+        <tr><td><strong>Kogo ewakuować pierwszego</strong></td><td>niepełne zgłoszenia</td><td>miejsca ze współrzędnymi</td></tr>
+        <tr><td><strong>Czy ktoś odcięty</strong></td><td>nie wie</td><td>wykrycia z GPS i pewnością</td></tr>
+        <tr><td><strong>Uzasadnienie decyzji</strong></td><td>notatka z pamięci</td><td>raport z sumą kontrolną</td></tr>
+      </table>
+      <div class="note" style="margin-top:.6cm">
+        Odbiorca decyzji: komendant powiatowy PSP + Powiatowe Centrum Zarządzania Kryzysowego.<br>
+        Straż, nie policja — to PSP prowadzi działania powodziowe w ramach KSRG.
+      </div>
+    </div>
+    <div class="col" style="max-width:11cm">
+      <div class="card" style="border-left-color:var(--ink)">
+        <h3>Nie zmieniamy jego procedur</h3>
+        <p style="font-family:'IBM Plex Mono',monospace;font-size:10.5pt;line-height:1.7;margin-top:.25cm">
+        DZIŚ:<br>zgłoszenie → <span style="color:var(--red)">[ luka informacyjna ]</span> → dysponowanie sił<br><br>
+        Z SKYOPS:<br>zgłoszenie → <span style="color:var(--green)">[ 20 minut, raport ]</span> → dysponowanie sił</p>
+      </div>
+      <p class="lead" style="font-size:14pt">Oficer nie uczy się nowego zawodu. Uczy się jednego ekranu. Reszta procedury zostaje bez zmian.</p>
+    </div>
+  </div>
+  <div class="mark">SkyOps</div><div class="num">03</div>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <div class="kicker">Konkretny problem operacyjny</div>
+  <h2>Powódź — przejezdność dróg</h2>
+  <div class="cols">
+    <div class="col" style="max-width:15cm">
+      <p class="lead" style="margin-bottom:.6cm">
+        Po trzech dobach opadów rzeka Wisłok występuje z brzegów.
+        Woda wchodzi do zabudowań w gminie pod Rzeszowem.
+      </p>
+      <p class="kicker">Trzy pytania bez odpowiedzi</p>
+      <div class="card"><h3>1 &nbsp; Które drogi są jeszcze przejezdne?</h3>
+        <p>Karetka i wozy straży muszą dojechać. Droga wojewódzka może być już pod wodą.</p></div>
+      <div class="card mag"><h3>2 &nbsp; Gdzie woda przybiera najszybciej?</h3>
+        <p>Kogo ewakuować w pierwszej kolejności.</p></div>
+      <div class="card grn"><h3>3 &nbsp; Czy ktoś został odcięty?</h3>
+        <p>Ludzie na dachach, na wyspach gruntu.</p></div>
+    </div>
+    <div class="col">
+      <img class="shot" src="../landing/assets/img/ai-flood.jpg" alt="Analiza zalania">
+      <div class="note" style="margin-top:.35cm;border:0;padding:0">
+        Analiza pokrycia wodą — system podaje <strong>procent terenu pod wodą</strong>, nie opis słowny.
+        „Road accessibility checks” to sformułowanie z opisu zadania.
+      </div>
+    </div>
+  </div>
+  <div class="mark">SkyOps</div><div class="num">04</div>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <div class="kicker">Proces — od zgłoszenia do działania</div>
+  <h2>Dron to krok 6 z 10</h2>
+  <div class="flow">
+    <div class="step" style="background:#fdf0ef;border-color:#c0392b"><b>1</b>wodowskaz<br>IMGW</div>
+    <div class="step"><b>2</b>ocena floty</div>
+    <div class="step"><b>3</b>zaznaczenie obszaru</div>
+    <div class="step"><b>4</b>system dzieli obszar</div>
+    <div class="step"><b>5</b>kontrola stref</div>
+    <div class="step hot"><b>6</b>LOT<br>dron = czujnik</div>
+    <div class="step"><b>7</b>AI analizuje</div>
+    <div class="step"><b>8</b>alert + potwierdzenie</div>
+    <div class="step"><b>9</b>raport</div>
+    <div class="step"><b>10</b>działanie</div>
+  </div>
+  <div class="cols" style="margin-top:.3cm">
+    <div class="col" style="max-width:15cm">
+      <table>
+        <tr><th>Krok</th><th>Kto</th><th>Czas</th></tr>
+        <tr><td><strong>1 — wodowskaz IMGW przekracza stan alarmowy</strong></td><td>dane publiczne</td><td>0 min</td></tr><tr><td><strong>4 — podział obszaru między maszyny</strong></td><td>system</td><td>+3 min</td></tr>
+        <tr><td><strong>6 — lot równoległy całej floty</strong></td><td>flota</td><td>+5 do +25 min</td></tr>
+        <tr><td><strong>7 — AI czyta obraz w locie</strong></td><td>AI</td><td>równolegle</td></tr>
+        <tr><td><strong>9 — Raport Sytuacyjny PDF</strong></td><td>system</td><td>+2 min po locie</td></tr>
+        <tr><td><strong>10 — decyzja dowodzącego</strong></td><td>człowiek</td><td><strong style="color:var(--blue)">+30 min od zgłoszenia</strong></td></tr>
+      </table>
+    </div>
+    <div class="col">
+      <img class="shot" src="img/demo-flood.png" alt="Podział obszaru i analiza zalania">
+    </div>
+  </div>
+  <div class="note">Wąskim gardłem nigdy nie był lot — było ręczne planowanie tras i oglądanie godzin nagrań. Usuwamy oba.</div>
+  <div class="mark">SkyOps</div><div class="num">05</div>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <div class="kicker">Niepewność danych — rdzeń rozwiązania</div>
+  <h2>Dwa źródła, dwa rodzaje niepewności</h2>
+  <div class="cols">
+    <div class="col">
+      <div class="card" style="border-left-color:var(--ink)">
+        <h3>Wodowskaz IMGW <span class="tag">dane publiczne</span></h3>
+        <p>Zna <strong>POZIOM</strong> — 485 cm przy stanie alarmowym 450.
+           Nie zna <strong>ZASIĘGU</strong>: nie powie, która droga 3 km dalej
+           jest pod wodą. Niepewność <em>przestrzenna</em>.</p>
+      </div>
+      <div class="card mag">
+        <h3>Dron + AI</h3>
+        <p>Zna <strong>ZASIĘG</strong> — widzi dokładnie, gdzie jest woda.
+           Nie jest pewien <strong>ZNACZENIA</strong>: woda czy mokry asfalt,
+           człowiek czy worek. Niepewność <em>percepcyjna</em>.</p>
+      </div>
+      <div class="card grn">
+        <h3>Operator rozstrzyga</h3>
+        <p>Każde wykrycie ma poziom pewności. Operator klika
+           <strong>potwierdź</strong> albo <strong>odrzuć</strong>. Tylko to
+           trafia do raportu jako ustalenie.</p>
+      </div>
+    </div>
+    <div class="col" style="max-width:13cm;display:flex;flex-direction:column;justify-content:center">
+      <p class="lead" style="font-size:17pt">
+        Wodowskaz mówi, że <strong style="color:var(--ink)">coś się dzieje</strong>.<br>
+        Dron mówi, <strong style="color:var(--ink)">gdzie dokładnie</strong>.<br>
+        Człowiek mówi, <strong style="color:var(--ink)">co jest prawdą</strong>.
+      </p>
+      <div class="note" style="margin-top:.7cm">
+        Raport dzieli ustalenia na <strong>POTWIERDZONE PRZEZ OPERATORA</strong>
+        i <strong>NIEPOTWIERDZONE — AI</strong>. Każda obserwacja ma wiek.
+        System nigdy nie twierdzi, że jest pewny — niepewność jest widoczna,
+        a nie ukryta.
+      </div>
+    </div>
+  </div>
+  <div class="mark">SkyOps</div><div class="num">06</div>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <div class="kicker">Demo na żywo</div>
+  <h2>Platforma działa — otwórzcie ją na telefonie</h2>
+  <div class="cols">
+    <div class="col" style="max-width:19cm">
+      <img class="shot" src="../media/share-view.png" alt="Podgląd /share dla sztabu">
+    </div>
+    <div class="col">
+      <div class="card"><h3>1 &nbsp; Zaznaczam obszar</h3><p>Flota dzieli go między siebie i startuje.</p></div>
+      <div class="card mag"><h3>2 &nbsp; Tryb Powódź</h3><p>AI mierzy procent terenu pod wodą.</p></div>
+      <div class="card grn"><h3>3 &nbsp; Raport Sytuacyjny</h3><p>Jedna strona. Rozdaję wydruki.</p></div>
+      <div class="card" style="border-left-color:var(--ink)"><h3>4 &nbsp; Link <span style="font-family:'IBM Plex Mono',monospace">/share</span></h3>
+        <p>Podaję telefon komuś z Jury — widzi ten sam żywy obraz. Bez instalacji, bez konta.</p></div>
+      <div class="note">To jest odpowiedź na „zły dostęp”. Nie da się jej pokazać slajdem.</div>
+    </div>
+  </div>
+  <div class="mark">SkyOps</div><div class="num">07</div>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <div class="kicker">Etyka i zgodność z prawem</div>
+  <h2>Rozwiązanie wyłącznie cywilne, z człowiekiem w pętli</h2>
+  <table>
+    <tr><th>Zasada</th><th>Jak jest zrealizowana</th></tr>
+    <tr><td><strong>Człowiek decyduje, nie AI</strong></td><td>operator potwierdza każde wykrycie — system nigdy nie działa sam</td></tr>
+    <tr><td><strong>Brak efektorów</strong></td><td>świadoma decyzja: budujemy warstwę decyzyjną, nie broń</td></tr>
+    <tr><td><strong>Prywatność</strong></td><td>AI działa lokalnie — obraz nie opuszcza maszyny ani kraju</td></tr>
+    <tr><td><strong>Zgodność z przepisami lotniczymi</strong></td><td>misja w strefę zakazaną jest odrzucana; dron w niej sam zawraca</td></tr>
+    <tr><td><strong>Rozliczalność</strong></td><td>suma kontrolna SHA-256 — można udowodnić, że raportu nie zmieniono</td></tr>
+    <tr><td><strong>Tylko zastosowania cywilne</strong></td><td>pożar, powódź, poszukiwanie ludzi</td></tr>
+  </table>
+  <div class="note">
+    Trzymamy się tego od początku projektu, nie od dzisiejszego brefingu.
+    Suma kontrolna chroni i obywatela, i służbę — później widać, na jakiej podstawie zapadła decyzja.
+  </div>
+  <div class="mark">SkyOps</div><div class="num">08</div>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <div class="kicker">Uczciwie</div>
+  <h2>Co działa dziś — a czego nie mamy</h2>
+  <div class="cols">
+    <div class="col">
+      <p class="kicker" style="color:var(--green)">Działa i można zobaczyć teraz</p>
+      <table>
+        <tr><td><span class="yes">✓</span> &nbsp;Mapa floty, telemetria na żywo</td></tr>
+        <tr><td><span class="yes">✓</span> &nbsp;Automatyczny podział obszaru</td></tr>
+        <tr><td><span class="yes">✓</span> &nbsp;AI: ludzie, pożar i dym, woda</td></tr>
+        <tr><td><span class="yes">✓</span> &nbsp;Strefy zakazu lotów + auto-powrót</td></tr>
+        <tr><td><span class="yes">✓</span> &nbsp;Raport Sytuacyjny PDF z sumą kontrolną</td></tr>
+        <tr><td><span class="yes">✓</span> &nbsp;Podgląd <span style="font-family:'IBM Plex Mono',monospace">/share</span> dla sztabu</td></tr>
+      </table>
+    </div>
+    <div class="col">
+      <p class="kicker" style="color:var(--red)">Czego nie mamy — mówimy sami</p>
+      <table>
+        <tr><td><span class="no">✗</span> &nbsp;Nie lecieliśmy prawdziwym dronem — złącze MAVLink gotowe, nietestowane w powietrzu</td></tr>
+        <tr><td><span class="no">✗</span> &nbsp;Integracja PansaUTM jest symulowana</td></tr>
+        <tr><td><span class="no">✗</span> &nbsp;Rój 200 dronów to koncepcja, nie produkt</td></tr>
+        <tr><td><span class="no">✗</span> &nbsp;<strong>Nie mamy jeszcze żadnego klienta</strong></td></tr>
+      </table>
+      <div class="note" style="margin-top:.5cm">
+        Mówimy to sami, zanim ktoś zapyta. W tej sali i tak ktoś sprawdzi.
+      </div>
+    </div>
+  </div>
+  <div class="mark">SkyOps</div><div class="num">09</div>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <div class="band-bottom" style="background-image:url(img/clip1.jpg)"></div>
+  <div class="kicker above">Czego szukamy</div>
+  <h1 class="above" style="font-size:52pt">Jednego wdrożenia<br>pilotażowego</h1>
+  <p class="lead above" style="font-size:20pt;margin-top:.6cm">
+    Nie sprzedaży. Jednego prawdziwego ćwiczenia z komendą powiatową —
+    użyjecie tego i powiecie nam, co jest źle.
+  </p>
+  <div class="above" style="margin-top:auto;display:flex;align-items:flex-end;gap:2cm">
+    <div>
+      <div class="kicker" style="margin-bottom:.15cm">Zespół</div>
+      <div class="big" style="font-size:34pt">SkyOps</div>
+    </div>
+    <div>
+      <div class="kicker" style="margin-bottom:.15cm">Platforma</div>
+      <div class="big" style="font-size:34pt;color:var(--blue)">getskyops.com</div>
+    </div>
+    <div style="margin-left:auto;max-width:12cm">
+      <div class="note" style="border-top:0;padding-top:0">
+        Jesteśmy dwie osoby z działającym systemem i bez ani jednego klienta.
+        Dlatego tu jesteśmy.
+      </div>
+    </div>
+  </div>
+  <div class="mark">SkyOps</div><div class="num">10</div>
+</section>
+
+</body>
+</html>

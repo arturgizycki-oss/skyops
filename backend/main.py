@@ -21,6 +21,7 @@ from pydantic import BaseModel, Field
 from detection import detector
 from flight_log import recorder, render_pdf, render_sitrep
 from geofence import geofences
+from hydro import hydro
 from sim import SimEngine, Waypoint
 from swarm import swarm
 
@@ -49,8 +50,10 @@ async def lifespan(app: FastAPI):
             dt, last = now - last, now
             vstat = detector.status()
             recorder.tick(engine.drones.values(), vstat["detections"],
-                          vstat.get("mode", "search"))
+                          vstat.get("mode", "search"),
+                          detector.confirmed_labels())
             app.state.airspace_picture = airspace.step(dt, engine.drones.values())
+            hydro.refresh()
             # geofence enforcement: breach -> immediate return home
             for d in engine.drones.values():
                 t = d.telemetry()
@@ -305,6 +308,56 @@ def set_video_mode(body: ModeIn):
 @app.get("/api/alerts")
 def list_alerts():
     return detector.recent_alerts()
+
+
+class AlertStatusIn(BaseModel):
+    status: str = Field(pattern="^(pending|confirmed|rejected)$")
+
+
+@app.post("/api/alerts/{alert_id}/status")
+def set_alert_status(alert_id: int, body: AlertStatusIn):
+    """Operator adjudicates a detection.
+
+    The AI proposes; a person decides. Only the decision is treated as
+    established fact in the Situation Report.
+    """
+    if not detector.set_alert_status(alert_id, body.status):
+        raise HTTPException(404, "alert not found")
+    return {"ok": True, "id": alert_id, "status": body.status}
+
+
+@app.get("/api/hydro")
+def hydro_picture():
+    """Official IMGW river gauges for the region.
+
+    The gauge says a river is rising; only the drone can say which road
+    is actually under water. This is the trigger end of that pairing.
+    """
+    return hydro.picture()
+
+
+class HydroSimIn(BaseModel):
+    station: str | None = None
+    over_alarm_cm: int = Field(default=25, ge=1, le=300)
+
+
+@app.post("/api/hydro/simulate")
+def hydro_simulate(body: HydroSimIn):
+    """Demonstration only - raise one gauge above its alarm threshold.
+
+    Marked `simulated` in every response so nobody can mistake it for a
+    real reading. A refresh from IMGW clears it.
+    """
+    st = hydro.simulate(body.station, body.over_alarm_cm)
+    if st is None:
+        raise HTTPException(404, "station not found or has no alarm threshold")
+    return {"ok": True, "simulated": True, "station": st}
+
+
+@app.delete("/api/hydro/simulate")
+def hydro_simulate_clear():
+    hydro.clear_simulation()
+    return {"ok": True, "simulated": False}
 
 
 @app.get("/api/traffic")
