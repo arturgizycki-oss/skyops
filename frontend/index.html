@@ -21,88 +21,84 @@
         <rect x="25" y="25" width="14" height="14" rx="4" fill="#fff" stroke="none"/>
       </svg></span>
       <h1>SkyOps</h1>
-      <span class="tagline">Drone Fleet Operations</span>
+      <span class="tagline" data-i18n="tagline">Dowodzenie flotą dronów</span>
     </a>
     <div class="head-right">
-      <button id="btn-share" class="btn demo-btn">Share view</button>
-      <button id="btn-demo" class="btn demo-btn">Auto demo: off</button>
+      <button id="btn-share" class="btn demo-btn" data-i18n="b.share">Podgląd dla sztabu</button>
+      <button id="btn-demo" class="btn demo-btn">Auto demo: wyl.</button>
+      <div class="lang" id="lang-switch"><button data-lang="pl" class="on">PL</button><button data-lang="en">EN</button></div>
       <div class="conn" id="conn-status">connecting...</div>
     </div>
   </header>
 
   <div class="layout">
     <aside id="sidebar">
-      <h2>Fleet</h2>
+      <h2 data-i18n="p.fleet">Flota</h2>
       <div id="fleet"></div>
 
       <div class="panel" id="mission-panel">
-        <h2>Mission Planner</h2>
-        <p class="hint" id="plan-hint">Select a drone, press "Plan mission",
-        then click the map to add waypoints.</p>
+        <h2 data-i18n="p.mission">Planowanie misji</h2>
+        <p class="hint" id="plan-hint" data-i18n="hint.plan">Wybierz drona, nacisnij "Planuj misje", potem klikaj na mapie.</p>
         <div class="btn-row">
-          <button id="btn-plan" class="btn">Plan mission</button>
-          <button id="btn-launch" class="btn primary" disabled>Launch</button>
-          <button id="btn-clear" class="btn" disabled>Clear</button>
+          <button id="btn-plan" class="btn" data-i18n="b.plan">Planuj misję</button>
+          <button id="btn-launch" class="btn primary" disabled data-i18n="b.launch">Start</button>
+          <button id="btn-clear" class="btn" disabled data-i18n="b.clear">Wyczyść</button>
         </div>
         <div class="btn-row">
-          <button id="btn-hold" class="btn warn" disabled>Hold</button>
-          <button id="btn-resume" class="btn" disabled>Resume</button>
-          <button id="btn-rtl" class="btn danger" disabled>Return home</button>
+          <button id="btn-hold" class="btn warn" disabled data-i18n="b.hold">Zawis</button>
+          <button id="btn-resume" class="btn" disabled data-i18n="b.resume">Wznów</button>
+          <button id="btn-rtl" class="btn danger" disabled data-i18n="b.rtl">Powrót</button>
         </div>
         <div class="btn-row">
-          <button id="btn-area" class="btn">Search area</button>
-          <button id="btn-area-go" class="btn primary" disabled>Launch fleet</button>
-          <button id="btn-area-clear" class="btn" disabled>Clear</button>
+          <button id="btn-area" class="btn" data-i18n="b.area">Zaznacz obszar</button>
+          <button id="btn-area-go" class="btn primary" disabled data-i18n="b.areago">Start floty</button>
+          <button id="btn-area-clear" class="btn" disabled data-i18n="b.clear">Wyczyść</button>
         </div>
-        <p class="hint" id="area-hint" hidden>Click the map to outline the
-        search area (3+ points). The fleet splits it automatically.</p>
+        <p class="hint" id="area-hint" data-i18n="hint.area" hidden>Klikaj na mapie, aby zaznaczyc obszar.</p>
       </div>
 
       <div class="panel" id="video-panel">
-        <h2>Camera - AI Detection</h2>
+        <h2 data-i18n="p.camera">Kamera - detekcja AI</h2>
         <div class="btn-row mode-row">
-          <button class="btn mode-btn active" data-mode="search">Search</button>
-          <button class="btn mode-btn" data-mode="fire">Fire</button>
-          <button class="btn mode-btn" data-mode="flood">Flood</button>
+          <button class="btn mode-btn active" data-mode="search" data-i18n="b.search">Ludzie</button>
+          <button class="btn mode-btn" data-mode="fire" data-i18n="b.fire">Pożar</button>
+          <button class="btn mode-btn" data-mode="flood" data-i18n="b.flood">Powódź</button>
         </div>
         <div class="video-wrap">
           <img id="video-feed" alt="camera feed" hidden>
-          <div id="video-offline" class="video-offline">camera offline</div>
+          <div id="video-offline" class="video-offline">kamera niedostępna</div>
         </div>
         <div id="detections" class="detections"></div>
         <div id="alerts" class="alerts"></div>
       </div>
 
       <div class="panel" id="zones-panel">
-        <h2>No-Fly Zones</h2>
+        <h2 data-i18n="p.zones">Strefy zakazu lotów</h2>
         <div class="btn-row">
-          <button id="btn-zone" class="btn">Draw zone</button>
-          <button id="btn-zone-save" class="btn primary" disabled>Save</button>
-          <button id="btn-zone-cancel" class="btn" disabled>Cancel</button>
+          <button id="btn-zone" class="btn" data-i18n="b.zone">Rysuj strefę</button>
+          <button id="btn-zone-save" class="btn primary" disabled data-i18n="b.save">Zapisz</button>
+          <button id="btn-zone-cancel" class="btn" disabled data-i18n="b.cancel">Anuluj</button>
         </div>
         <div id="zones" class="logs"></div>
       </div>
 
       <div class="panel" id="roads-panel">
-        <h2>Przejezdność dróg <span class="tag-live">decyzja</span></h2>
-        <div id="roads-summary" class="hint">Brak danych.</div>
+        <h2 data-i18n="p.roads">Przejezdność dróg</h2>
+        <div id="roads-summary" class="hint" data-i18n="hint.nodata">Brak danych.</div>
         <div id="roads-list" class="logs"></div>
       </div>
 
       <div class="panel" id="hydro-panel">
-        <h2>Wodowskazy IMGW <span class="tag-live">dane publiczne</span></h2>
-        <div id="hydro-summary" class="hint">Pobieranie danych IMGW...</div>
+        <h2 data-i18n="p.hydro">Wodowskazy IMGW</h2>
+        <div id="hydro-summary" class="hint" data-i18n="hint.loading">Pobieranie danych IMGW...</div>
         <div id="hydro-list" class="logs"></div>
-        <p class="concept-note">
-          Wodowskaz podaje POZIOM, nie ZASIEG. Nie powie, ktora droga jest
-          pod woda - to sprawdza dron.
-        </p>
+        <p class="concept-note" data-i18n="roads.note">Wodowskaz podaje POZIOM, nie ZASIEG.</p>
       </div>
 
       <div class="panel" id="swarm-panel">
-        <h2>Fire Swarm <span class="tag-concept">concept</span></h2>
+        <h2 data-i18n="p.swarm">Rój przeciwpożarowy</h2>
         <div class="btn-row">
-          <button id="btn-swarm-place" class="btn">Place fire</button>
+          <button id="btn-swarm-place" class="btn" data-i18n="b.placefire">Wskaż pożar</button>
           <select id="swarm-count" class="select">
             <option value="50">50 drones</option>
             <option value="100">100 drones</option>
@@ -110,22 +106,17 @@
           </select>
         </div>
         <div class="btn-row">
-          <button id="btn-swarm-go" class="btn primary" disabled>Deploy swarm</button>
-          <button id="btn-swarm-stop" class="btn danger" disabled>Stand down</button>
+          <button id="btn-swarm-go" class="btn primary" disabled data-i18n="b.deploy">Wyślij rój</button>
+          <button id="btn-swarm-stop" class="btn danger" disabled data-i18n="b.standdown">Odwołaj</button>
         </div>
-        <div id="swarm-hint" class="hint">
-          Click "Place fire", then click the map to start a wildfire.
-        </div>
+        <div id="swarm-hint" class="hint" data-i18n="hint.fire">Nacisnij "Wskaz pozar", potem kliknij na mapie.</div>
         <div id="swarm-stats" class="swarm-stats" hidden></div>
-        <p class="concept-note">
-          Simulated concept. No such fleet is fielded today - this shows
-          the control layer at 200 aircraft.
-        </p>
+        <p class="concept-note" data-i18n="swarm.note">Symulacja koncepcyjna.</p>
       </div>
 
       <div class="panel" id="logs-panel">
-        <h2>Flight Logs</h2>
-        <div id="logs" class="logs"><span class="hint">No flights yet.</span></div>
+        <h2 data-i18n="p.logs">Dziennik lotów</h2>
+        <div id="logs" class="logs"><span class="hint">Brak lotów.</span></div>
       </div>
 
     </aside>
@@ -135,6 +126,7 @@
 </div>
 
 <script src="/static/vendor/leaflet/leaflet.js"></script>
+<script src="/static/i18n.js"></script>
 <script src="/static/app.js"></script>
 </body>
 </html>

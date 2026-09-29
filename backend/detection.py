@@ -48,7 +48,7 @@ FLOOD_ALERT_PCT = 40
 # detection. They must be identical: the operator's verdict is matched back
 # to the logged observation by label, so two different strings silently
 # break the confirm -> report chain.
-FLOOD_LABEL = "water %"
+FLOOD_LABEL = "woda %"
 
 BOX_COLOR = (235, 99, 37)     # BGR: SkyOps blue
 LABEL_COLOR = (255, 255, 255)

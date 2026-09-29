@@ -338,7 +338,8 @@ def render_sitrep(rec: dict) -> bytes:
     dets = s.get("detections", {})
     c.setFont("Helvetica", 11)
     c.setFillColor(INK)
-    if mode == "flood" and "water %" in dets:
+    from detection import FLOOD_LABEL
+    if mode == "flood" and FLOOD_LABEL in dets:
         text = (f"Flood water observed; peak measured coverage in frame "
                 f"{max(e['count'] for e in rec.get('events', [{'count': dets['water %']}]))}%.")
     elif dets:
@@ -366,9 +367,10 @@ def render_sitrep(rec: dict) -> bytes:
     if mode == "flood":
         try:
             from roads import network as _rn
+            from detection import FLOOD_LABEL
             if _rn.loaded:
                 obs = [e for e in rec.get("events", [])
-                       if e.get("label") == "water %"]
+                       if e.get("label") == FLOOD_LABEL]
                 road_lines = _rn.impassable_summary(obs)[:5]
         except Exception:
             road_lines = []

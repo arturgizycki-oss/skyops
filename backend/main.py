@@ -23,6 +23,7 @@ from flight_log import recorder, render_pdf, render_sitrep
 from geofence import geofences
 from hydro import hydro
 from roads import network as roadnet
+from detection import FLOOD_LABEL
 from sim import SimEngine, Waypoint
 from swarm import swarm
 
@@ -331,14 +332,14 @@ def _flood_observations(log_id: str | None = None) -> list[dict]:
     """Flood observations from a sortie: position plus coverage percent."""
     logs = recorder.list_logs()
     if log_id is None:
-        flood = [l for l in logs if l.get("detections", {}).get("water %")]
+        flood = [l for l in logs if l.get("detections", {}).get(FLOOD_LABEL)]
         if not flood:
             return []
         log_id = flood[0]["id"]
     rec = recorder.get(log_id)
     if not rec:
         return []
-    return [e for e in rec.get("events", []) if e.get("label") == "water %"]
+    return [e for e in rec.get("events", []) if e.get("label") == FLOOD_LABEL]
 
 
 @app.get("/api/roads")

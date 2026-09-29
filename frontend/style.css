@@ -553,3 +553,14 @@ body.viewer #swarm-panel #swarm-hint { display: none; }
 }
 .road-row.bad { border-left-color: #c0392b; background: #fdf0ef; }
 .road-row.warn { border-left-color: var(--amber); background: #fdf6e8; }
+
+/* --- Language switch --- */
+.lang { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 3px; overflow: hidden; }
+.lang button {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px; letter-spacing: 0.06em;
+  padding: 4px 9px; border: 0; cursor: pointer;
+  background: var(--panel); color: var(--slate);
+}
+.lang button + button { border-left: 1px solid var(--line); }
+.lang button.on { background: var(--ink); color: #fff; }

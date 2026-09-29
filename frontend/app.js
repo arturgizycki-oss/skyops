@@ -9,7 +9,7 @@ window.addEventListener("DOMContentLoaded", () => {
   if (VIEWER) {
     const badge = document.createElement("span");
     badge.className = "viewer-badge";
-    badge.textContent = "View only";
+    badge.textContent = t("viewonly");
     document.querySelector(".head-right").prepend(badge);
     return;
   }
@@ -18,13 +18,13 @@ window.addEventListener("DOMContentLoaded", () => {
     const url = `${location.origin}/share`;
     try {
       await navigator.clipboard.writeText(url);
-      shareBtn.textContent = "Link copied!";
+      shareBtn.textContent = t("b.share") + " OK";
     } catch {
-      prompt("Share this read-only link:", url);
-      shareBtn.textContent = "Share view";
+      prompt(t("b.share") + ":", url);
+      shareBtn.textContent = t("b.share");
       return;
     }
-    setTimeout(() => { shareBtn.textContent = "Share view"; }, 2000);
+    setTimeout(() => { shareBtn.textContent = t("b.share"); }, 2000);
   };
 });
 
@@ -75,6 +75,7 @@ function droneIcon(heading, selected) {
   });
 }
 
+// flight states, shown on the drone cards - the jury reads these
 function batteryClass(pct) {
   if (pct <= 25) return "critical";
   if (pct <= 45) return "low";
@@ -89,7 +90,7 @@ function renderFleet() {
     card.innerHTML = `
       <div class="row1">
         <span class="name">${d.name}</span>
-        <span class="state-badge ${d.state}">${d.state}</span>
+        <span class="state-badge ${d.state}">${t("s." + d.state)}</span>
       </div>
       <div class="stats">
         <span>ALT <b>${d.alt} m</b></span>
@@ -154,8 +155,8 @@ els.plan.onclick = () => {
   state.planning = !state.planning;
   els.plan.classList.toggle("active", state.planning);
   els.hint.textContent = state.planning
-    ? "Planning: click the map to drop waypoints, then press Launch."
-    : 'Select a drone, press "Plan mission", then click the map to add waypoints.';
+    ? t("hint.planning")
+    : t("hint.plan");
 };
 
 map.on("click", (e) => {
@@ -197,7 +198,7 @@ els.launch.onclick = async () => {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    alert(err.detail || "Mission rejected");
+    alert(err.detail || t("hint.rejected"));
     return;
   }
   showUtmToast((await res.json().catch(() => ({}))).utm);
@@ -229,7 +230,7 @@ function connect() {
   const proto = location.protocol === "https:" ? "wss" : "ws";
   const ws = new WebSocket(`${proto}://${location.host}/ws`);
   ws.onopen = () => {
-    els.conn.textContent = "live";
+    els.conn.textContent = t("conn.live");
     els.conn.className = "conn ok";
   };
   ws.onmessage = (ev) => {
@@ -251,7 +252,7 @@ function connect() {
     updateButtons();
   };
   ws.onclose = () => {
-    els.conn.textContent = "reconnecting...";
+    els.conn.textContent = t("conn.wait");
     els.conn.className = "conn err";
     setTimeout(connect, 1500);
   };
@@ -364,8 +365,8 @@ async function refreshZones() {
     zEls.list.innerHTML = zones.map(z =>
       `<div class="log-row"><span><b>${z.name}</b>
          <span class="meta">${z.points.length} pts</span></span>
-       <a href="#" data-zone="${z.id}">remove</a></div>`).join("")
-      || '<span class="hint">No zones defined.</span>';
+       <a href="#" data-zone="${z.id}">${t("b.remove")}</a></div>`).join("")
+      || `<span class="hint">${t("hint.nozones")}</span>`;
     zEls.list.querySelectorAll("a[data-zone]").forEach(a => {
       a.onclick = async (e) => {
         e.preventDefault();
@@ -563,7 +564,7 @@ async function startReplay(logId) {
 
 const demoBtn = document.getElementById("btn-demo");
 function renderDemoBtn(on) {
-  demoBtn.textContent = `Auto demo: ${on ? "on" : "off"}`;
+  demoBtn.textContent = `Auto demo: ${on ? "wl." : "wyl."}`;
   demoBtn.classList.toggle("on", on);
   demoBtn.dataset.on = on ? "1" : "";
 }
@@ -607,8 +608,8 @@ async function setAlertStatus(id, status) {
 
 function alertAge(ts) {
   const s = Math.max(0, Math.round(Date.now() / 1000 - ts));
-  if (s < 60) return `${s} s temu`;
-  return `${Math.round(s / 60)} min temu`;
+  if (s < 60) return `${s} s ${t("ago")}`;
+  return `${Math.round(s / 60)} min ${t("ago")}`;
 }
 
 async function refreshAlerts() {
@@ -621,16 +622,16 @@ async function refreshAlerts() {
       // a confidence is a classifier's own certainty; flood coverage is a
       // measurement, so it is labelled as one instead of faking a score
       const conf = a.conf == null
-        ? `<span class="conf meas">pomiar</span>`
+        ? `<span class="conf meas">${t("measure")}</span>`
         : `<span class="conf">${Math.round(a.conf * 100)}%</span>`;
       const controls = (VIEWER || st !== "pending") ? "" : `
         <span class="adj">
-          <button class="ok" onclick="setAlertStatus(${a.id},'confirmed')">potwierdz</button>
-          <button class="no" onclick="setAlertStatus(${a.id},'rejected')">odrzuc</button>
+          <button class="ok" onclick="setAlertStatus(${a.id},'confirmed')">${t('confirm')}</button>
+          <button class="no" onclick="setAlertStatus(${a.id},'rejected')">${t('reject')}</button>
         </span>`;
       const verdict = st === "confirmed"
-        ? `<span class="verdict ok">potwierdzone</span>`
-        : st === "rejected" ? `<span class="verdict no">odrzucone</span>` : "";
+        ? `<span class="verdict ok">${t("st.confirmed")}</span>`
+        : st === "rejected" ? `<span class="verdict no">${t("st.rejected")}</span>` : "";
       return `<div class="alert-row st-${st}">
         <div class="ar-main"><span class="t">${t}</span>
           <span class="lab">${a.label} (x${a.count})</span> ${conf}</div>
@@ -728,7 +729,7 @@ function renderSwarm(msg) {
     swarmState.base = L.circleMarker(msg.base, {
       renderer: swarmCanvas, radius: 7, color: "#132430",
       fillColor: "#f3f7f9", fillOpacity: 1, weight: 2,
-    }).addTo(map).bindTooltip("Forward base - refill", { direction: "top" });
+    }).addTo(map).bindTooltip("Baza wysunieta - tankowanie", { direction: "top" });
   }
 
   // fire grid: create each cell once, then only recolour
@@ -799,8 +800,8 @@ sEls.place.onclick = () => {
   swarmState.placing = !swarmState.placing;
   sEls.place.classList.toggle("active", swarmState.placing);
   sEls.hint.textContent = swarmState.placing
-    ? "Click the map where the fire starts."
-    : 'Click "Place fire", then click the map to start a wildfire.';
+    ? t("hint.fire")
+    : t("hint.fire");
 };
 
 map.on("click", (e) => {
@@ -813,7 +814,7 @@ map.on("click", (e) => {
   swarmState.placing = false;
   sEls.place.classList.remove("active");
   sEls.go.disabled = false;
-  sEls.hint.textContent = "Fire placed. Press \"Deploy swarm\".";
+  sEls.hint.textContent = t("hint.fireplaced");
 });
 
 sEls.go.onclick = async () => {
@@ -825,7 +826,7 @@ sEls.go.onclick = async () => {
   });
   if (res.ok) {
     sEls.stop.disabled = false;
-    sEls.hint.textContent = "Swarm deployed. Aircraft are launching in waves.";
+    sEls.hint.textContent = "Roj wyslany. Maszyny startuja falami.";
     map.setView(ll, 14);
   } else {
     sEls.go.disabled = false;
@@ -838,7 +839,7 @@ sEls.stop.onclick = async () => {
   sEls.stats.hidden = true;
   sEls.stop.disabled = true;
   sEls.go.disabled = true;
-  sEls.hint.textContent = 'Click "Place fire", then click the map to start a wildfire.';
+  sEls.hint.textContent = t("hint.fire");
 };
 
 // a reload mid-demo must not strand the operator: recover the swarm's
@@ -848,7 +849,7 @@ async function initSwarm() {
     const s = await (await fetch("/api/swarm")).json();
     if (s.active) {
       sEls.stop.disabled = false;
-      sEls.hint.textContent = "Swarm already deployed and fighting the fire.";
+      sEls.hint.textContent = "Roj juz dziala przy pozarze.";
     }
   } catch { /* server not reachable yet; the websocket will catch up */ }
 }
@@ -890,16 +891,16 @@ async function refreshHydro() {
     if (!sum || !list) return;
 
     if (p.error && !p.stations.length) {
-      sum.textContent = "Brak polaczenia z IMGW - pracujemy na danych z drona.";
+      sum.textContent = t("h.offline");
       return;
     }
 
     const c = p.counts || {};
     const alarm = c["alarmowy"] || 0, warn = c["ostrzegawczy"] || 0;
-    sum.innerHTML = `${p.stations.length} wodowskazow &middot; `
-      + `<b style="color:${HYDRO_COLOR['alarmowy']}">${alarm} alarm</b> &middot; `
-      + `<b style="color:${HYDRO_COLOR['ostrzegawczy']}">${warn} ostrzegawczy</b>`
-      + (p.age_s != null ? ` &middot; dane sprzed ${Math.round(p.age_s / 60)} min` : "");
+    sum.innerHTML = `${p.stations.length} ${t("h.gauges")} &middot; `
+      + `<b style="color:${HYDRO_COLOR['alarmowy']}">${alarm} ${t("h.alarm")}</b> &middot; `
+      + `<b style="color:${HYDRO_COLOR['ostrzegawczy']}">${warn} ${t("h.warn")}</b>`
+      + (p.age_s != null ? ` &middot; ${t("h.age")} ${Math.round(p.age_s / 60)} ${t("h.min")}` : "");
 
     // only the ones an officer would act on
     const hot = p.stations.filter(s => s.status === "alarmowy" || s.status === "ostrzegawczy");
@@ -910,7 +911,7 @@ async function refreshHydro() {
         <span class="thr">alarm ${s.alarm_cm}</span>
         ${s.simulated ? '<span class="sim">SYMULACJA</span>' : ""}
       </div>`).join("")
-      : `<span class="hint">Wszystkie wodowskazy w normie.</span>`;
+      : `<span class="hint">${t("h.normal")}</span>`;
 
     for (const s of p.stations) {
       const key = String(s.id);
@@ -968,16 +969,16 @@ async function refreshRoads() {
     if (el) {
       const c = d.counts || {};
       el.innerHTML =
-        `<b style="color:${ROAD_COLOR['nieprzejezdna']}">${c["nieprzejezdna"] || 0}</b> nieprzejezdnych &middot; `
-        + `<b style="color:${ROAD_COLOR['podejrzana']}">${c["podejrzana"] || 0}</b> podejrzanych &middot; `
-        + `<b style="color:${ROAD_COLOR['przejezdna']}">${c["przejezdna"] || 0}</b> przejezdnych<br>`
-        + `<span class="hint">${c["nieznana"] || 0} dróg bez obserwacji — nie raportujemy ich jako przejezdne.</span>`;
+        `<b style="color:${ROAD_COLOR['nieprzejezdna']}">${c["nieprzejezdna"] || 0}</b> ${t("r.impassable")} &middot; `
+        + `<b style="color:${ROAD_COLOR['podejrzana']}">${c["podejrzana"] || 0}</b> ${t("r.suspect")} &middot; `
+        + `<b style="color:${ROAD_COLOR['przejezdna']}">${c["przejezdna"] || 0}</b> ${t("r.passable")}<br>`
+        + `<span class="hint">${c["nieznana"] || 0} ${t("r.note")}</span>`;
     }
     const list = document.getElementById("roads-list");
     if (list) {
       list.innerHTML = (d.summary || []).slice(0, 6).map(s =>
         `<div class="road-row ${s.startsWith("NIEPRZEJEZDNA") ? "bad" : "warn"}">${s}</div>`
-      ).join("") || '<span class="hint">Brak obserwacji zalania.</span>';
+      ).join("") || `<span class="hint">${t("r.none")}</span>`;
     }
   } catch { /* backend not ready */ }
 }
