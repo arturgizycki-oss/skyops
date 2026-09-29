@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SkyOps - Drone Operations</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%232563eb' stroke-width='5' stroke-linecap='round'%3E%3Ccircle cx='14' cy='14' r='8'/%3E%3Ccircle cx='50' cy='14' r='8'/%3E%3Ccircle cx='14' cy='50' r='8'/%3E%3Ccircle cx='50' cy='50' r='8'/%3E%3Cpath d='M19 19l8 8m18-16l-8 8m-18 18l8-8m18 16l-8-8'/%3E%3C/g%3E%3Crect x='25' y='25' width='14' height='14' rx='4' fill='%232563eb'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div id="app">
+  <header>
+    <a class="brand" href="/" title="SkyOps home">
+      <span class="logo"><svg width="16" height="16" viewBox="0 0 64 64"
+        fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round">
+        <circle cx="14" cy="14" r="8"/><circle cx="50" cy="14" r="8"/>
+        <circle cx="14" cy="50" r="8"/><circle cx="50" cy="50" r="8"/>
+        <path d="M19 19l8 8m18-16l-8 8m-18 18l8-8m18 16l-8-8"/>
+        <rect x="25" y="25" width="14" height="14" rx="4" fill="#fff" stroke="none"/>
+      </svg></span>
+      <h1>SkyOps</h1>
+      <span class="tagline">Drone Fleet Operations</span>
+    </a>
+    <div class="head-right">
+      <button id="btn-share" class="btn demo-btn">Share view</button>
+      <button id="btn-demo" class="btn demo-btn">Auto demo: off</button>
+      <div class="conn" id="conn-status">connecting...</div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside id="sidebar">
+      <h2>Fleet</h2>
+      <div id="fleet"></div>
+
+      <div class="panel" id="mission-panel">
+        <h2>Mission Planner</h2>
+        <p class="hint" id="plan-hint">Select a drone, press "Plan mission",
+        then click the map to add waypoints.</p>
+        <div class="btn-row">
+          <button id="btn-plan" class="btn">Plan mission</button>
+          <button id="btn-launch" class="btn primary" disabled>Launch</button>
+          <button id="btn-clear" class="btn" disabled>Clear</button>
+        </div>
+        <div class="btn-row">
+          <button id="btn-hold" class="btn warn" disabled>Hold</button>
+          <button id="btn-resume" class="btn" disabled>Resume</button>
+          <button id="btn-rtl" class="btn danger" disabled>Return home</button>
+        </div>
+        <div class="btn-row">
+          <button id="btn-area" class="btn">Search area</button>
+          <button id="btn-area-go" class="btn primary" disabled>Launch fleet</button>
+          <button id="btn-area-clear" class="btn" disabled>Clear</button>
+        </div>
+        <p class="hint" id="area-hint" hidden>Click the map to outline the
+        search area (3+ points). The fleet splits it automatically.</p>
+      </div>
+
+      <div class="panel" id="video-panel">
+        <h2>Camera - AI Detection</h2>
+        <div class="btn-row mode-row">
+          <button class="btn mode-btn active" data-mode="search">Search</button>
+          <button class="btn mode-btn" data-mode="fire">Fire</button>
+          <button class="btn mode-btn" data-mode="flood">Flood</button>
+        </div>
+        <div class="video-wrap">
+          <img id="video-feed" alt="camera feed" hidden>
+          <div id="video-offline" class="video-offline">camera offline</div>
+        </div>
+        <div id="detections" class="detections"></div>
+        <div id="alerts" class="alerts"></div>
+      </div>
+
+      <div class="panel" id="zones-panel">
+        <h2>No-Fly Zones</h2>
+        <div class="btn-row">
+          <button id="btn-zone" class="btn">Draw zone</button>
+          <button id="btn-zone-save" class="btn primary" disabled>Save</button>
+          <button id="btn-zone-cancel" class="btn" disabled>Cancel</button>
+        </div>
+        <div id="zones" class="logs"></div>
+      </div>
+
+      <div class="panel" id="swarm-panel">
+        <h2>Fire Swarm <span class="tag-concept">concept</span></h2>
+        <div class="btn-row">
+          <button id="btn-swarm-place" class="btn">Place fire</button>
+          <select id="swarm-count" class="select">
+            <option value="50">50 drones</option>
+            <option value="100">100 drones</option>
+            <option value="200" selected>200 drones</option>
+          </select>
+        </div>
+        <div class="btn-row">
+          <button id="btn-swarm-go" class="btn primary" disabled>Deploy swarm</button>
+          <button id="btn-swarm-stop" class="btn danger" disabled>Stand down</button>
+        </div>
+        <div id="swarm-hint" class="hint">
+          Click "Place fire", then click the map to start a wildfire.
+        </div>
+        <div id="swarm-stats" class="swarm-stats" hidden></div>
+        <p class="concept-note">
+          Simulated concept. No such fleet is fielded today - this shows
+          the control layer at 200 aircraft.
+        </p>
+      </div>
+
+      <div class="panel" id="logs-panel">
+        <h2>Flight Logs</h2>
+        <div id="logs" class="logs"><span class="hint">No flights yet.</span></div>
+      </div>
+
+    </aside>
+
+    <main id="map"></main>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

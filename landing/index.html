@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SkyOps</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%230f62e6' stroke-width='5' stroke-linecap='round'%3E%3Ccircle cx='14' cy='14' r='8'/%3E%3Ccircle cx='50' cy='14' r='8'/%3E%3Ccircle cx='14' cy='50' r='8'/%3E%3Ccircle cx='50' cy='50' r='8'/%3E%3Cpath d='M19 19l8 8m18-16l-8 8m-18 18l8-8m18 16l-8-8'/%3E%3C/g%3E%3Crect x='25' y='25' width='14' height='14' rx='4' fill='%230f62e6'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --paper: #f3f7f9;
+  --paper-2: #e9f0f4;
+  --ink: #132430;
+  --ink-soft: #3c5364;
+  --slate: #5b7284;
+  --line: #cfdde5;
+  --blue: #0f62e6;
+  --blue-soft: #dce9fd;
+  --magenta: #c22e6f;
+  --green: #148a5c;
+  --green-soft: #d9f0e6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.6;
+}
+.mono { font-family: "IBM Plex Mono", Consolas, monospace; }
+
+.wrap { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
+
+/* ---------- header ---------- */
+.topbar-wrap {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(243, 247, 249, .72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(207, 221, 229, .6);
+}
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0;
+}
+.brand {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700; font-size: 24px; letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.brand .tri { color: var(--blue); }
+.topbar .callsign {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px; color: var(--slate); letter-spacing: 1px;
+}
+
+/* ---------- hero ---------- */
+.hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); background: var(--ink); }
+.hero-video {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: 0;
+  opacity: 1; transition: opacity 1.2s ease;
+}
+.hero-video.faded { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-video { transition: none; }
+}
+.hero-shade {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(100deg,
+    rgba(9, 20, 28, .90) 0%, rgba(9, 20, 28, .74) 45%, rgba(9, 20, 28, .38) 100%);
+}
+.hero .hero-grid { z-index: 2; opacity: .16; }
+.hero-inner { position: relative; z-index: 3; }
+.hero .eyebrow { color: #8db8ff; }
+.hero h1 { color: #f4f8fb; }
+.hero h1 .alt { color: #8db8ff; }
+.hero p.lede { color: #dbe6ee; text-shadow: 0 1px 8px rgba(9, 20, 28, .8); }
+.hero h1 { text-shadow: 0 2px 12px rgba(9, 20, 28, .6); }
+.hero .btn-ghost { background: rgba(255, 255, 255, .08); color: #f4f8fb; border-color: rgba(255, 255, 255, .35); }
+.hero .btn-ghost:hover { border-color: #fff; }
+.hero .chart .wp { fill: rgba(9, 20, 28, .5); stroke: #9fc3ff; }
+.hero .chart .route { stroke: #9fc3ff; }
+.hero .chart .flown { stroke: #ff7ab0; }
+.hero .chart .ring { stroke: #ff7ab0; }
+.hero .chart .wp-label { fill: #b8cbdb; }
+.hero-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 56px 56px;
+  opacity: .45;
+}
+.hero-inner {
+  position: relative;
+  display: grid; grid-template-columns: 1.1fr .9fr; gap: 40px;
+  align-items: center;
+  padding: 84px 0 90px;
+}
+.eyebrow {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--blue); margin-bottom: 18px;
+}
+h1 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700; font-size: clamp(52px, 7vw, 84px);
+  line-height: .95; text-transform: uppercase; letter-spacing: 1px;
+  text-wrap: balance;
+}
+h1 .alt { color: var(--blue); }
+.hero p.lede {
+  margin-top: 22px; max-width: 46ch; font-size: 19px; color: var(--ink-soft);
+}
+.cta-row { margin-top: 34px; display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+.btn {
+  display: inline-block; text-decoration: none;
+  font-family: "Barlow Condensed", sans-serif; font-weight: 600;
+  font-size: 18px; letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 13px 30px; border-radius: 12px;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.btn:focus-visible { outline: 3px solid var(--blue-soft); outline-offset: 2px; }
+.btn-primary {
+  background: var(--magenta);
+  color: #fff;
+  box-shadow: 0 5px 18px rgba(194, 46, 111, .32);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 9px 24px rgba(194, 46, 111, .38); }
+.btn-ghost { color: var(--ink); border: 1px solid var(--line); background: #fff; }
+.btn-ghost:hover { border-color: var(--slate); }
+
+/* hero chart */
+.chart { width: 100%; height: auto; display: block; }
+.chart .route {
+  fill: none; stroke: var(--blue); stroke-width: 2.5;
+  stroke-dasharray: 8 7;
+  animation: dash 30s linear infinite;
+}
+.chart .flown { fill: none; stroke: var(--magenta); stroke-width: 2.5; }
+.chart .wp { fill: var(--paper); stroke: var(--blue); stroke-width: 2; }
+.chart .wp-label { font-family: "IBM Plex Mono", monospace; font-size: 11px; fill: var(--slate); }
+.chart .ring { fill: none; stroke: var(--magenta); stroke-width: 1.2; opacity: .5; }
+@keyframes dash { to { stroke-dashoffset: -300; } }
+@media (prefers-reduced-motion: reduce) {
+  .chart .route { animation: none; }
+  .btn { transition: none; }
+}
+
+/* ---------- sections ---------- */
+section { padding: 78px 0; }
+section + section { border-top: 1px solid var(--line); }
+.sec-head { margin-bottom: 44px; }
+.sec-head .eyebrow { margin-bottom: 10px; }
+h2 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700; font-size: clamp(34px, 4vw, 46px);
+  text-transform: uppercase; letter-spacing: 1px; line-height: 1.05;
+  text-wrap: balance;
+}
+.sec-head p { margin-top: 12px; color: var(--ink-soft); max-width: 60ch; }
+
+/* capability cards */
+.cap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.cap {
+  background: #fff; border: 1px solid var(--line); border-radius: 16px;
+  padding: 26px 24px;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.cap:hover {
+  transform: translateY(-4px);
+  border-color: #b9d2f5;
+  box-shadow: 0 14px 34px rgba(15, 98, 230, .12);
+}
+.cap .code {
+  font-family: "IBM Plex Mono", monospace; font-size: 11px;
+  letter-spacing: 2px; color: var(--blue); margin-bottom: 12px;
+}
+.cap h3 {
+  font-family: "Barlow Condensed", sans-serif; font-weight: 600;
+  font-size: 22px; text-transform: uppercase; letter-spacing: .5px;
+  margin-bottom: 8px;
+}
+.cap p { font-size: 15px; color: var(--ink-soft); }
+
+/* mission sequence */
+.seq { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; position: relative; }
+.leg { padding: 0 18px 0 0; position: relative; }
+.leg + .leg { border-left: 2px dashed var(--line); padding-left: 18px; }
+.leg .wp-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: "IBM Plex Mono", monospace; font-size: 12px;
+  letter-spacing: 1px; color: var(--blue); margin-bottom: 12px;
+}
+.leg .wp-tag::before {
+  content: ""; width: 0; height: 0;
+  border-left: 6px solid transparent; border-right: 6px solid transparent;
+  border-bottom: 10px solid var(--blue);
+}
+.leg h3 {
+  font-family: "Barlow Condensed", sans-serif; font-weight: 600;
+  font-size: 21px; text-transform: uppercase; margin-bottom: 6px;
+}
+.leg p { font-size: 15px; color: var(--ink-soft); }
+
+/* live panel mock */
+.mock {
+  background: #fff; border: 1px solid var(--line); border-radius: 8px;
+  padding: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+}
+.fleet-card {
+  border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px;
+  background: var(--paper);
+}
+.fleet-card .r1 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.fleet-card .nm { font-weight: 600; }
+.badge {
+  font-family: "IBM Plex Mono", monospace; font-size: 10px;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  background: var(--green-soft); color: var(--green);
+  padding: 3px 10px; border-radius: 12px;
+}
+.tele { display: flex; gap: 18px; font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--slate); font-variant-numeric: tabular-nums; }
+.tele b { color: var(--ink); font-weight: 500; }
+.bat { height: 5px; border-radius: 3px; background: var(--line); margin-top: 10px; overflow: hidden; }
+.bat > div { height: 100%; width: 72%; background: var(--green); }
+.det-line { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.chip {
+  font-family: "IBM Plex Mono", monospace; font-size: 11px;
+  background: var(--blue-soft); color: var(--blue);
+  padding: 4px 12px; border-radius: 12px;
+}
+.mock h4 {
+  font-family: "IBM Plex Mono", monospace; font-size: 11px;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--slate);
+  margin-bottom: 12px; font-weight: 500;
+}
+
+/* real screenshots */
+.shots { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.shot {
+  width: 100%; display: block; border-radius: 16px;
+  border: 1px solid var(--line); box-shadow: var(--shadow);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.shot:hover { transform: scale(1.012); box-shadow: 0 16px 40px rgba(15, 36, 48, .16); }
+
+/* scroll reveal */
+.reveal { opacity: 0; transform: translateY(22px);
+  transition: opacity .6s ease, transform .6s ease; }
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+.shot-cap {
+  font-family: "IBM Plex Mono", monospace; font-size: 11px;
+  letter-spacing: 1.5px; color: var(--slate); margin-top: 8px;
+}
+figure { margin: 0; }
+
+/* specs */
+.specs { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.specs-wrap { overflow-x: auto; }
+.specs th, .specs td { text-align: left; padding: 13px 18px; border-bottom: 1px solid var(--line); font-size: 15px; }
+.specs th {
+  font-family: "IBM Plex Mono", monospace; font-weight: 500; font-size: 12px;
+  letter-spacing: 1px; text-transform: uppercase; color: var(--slate);
+  width: 34%; background: var(--paper);
+}
+.specs tr:last-child th, .specs tr:last-child td { border-bottom: none; }
+
+/* summit CTA */
+.summit {
+  background: radial-gradient(120% 160% at 85% 0%, #1d3a52 0%, var(--ink) 55%);
+  color: #eef4f8; border-radius: 22px;
+  padding: 54px 48px; position: relative; overflow: hidden;
+}
+.summit .hero-grid { opacity: .12; }
+.summit-inner { position: relative; display: flex; justify-content: space-between; align-items: center; gap: 30px; flex-wrap: wrap; }
+.summit .eyebrow { color: #7fb2ff; }
+.summit h2 { color: #fff; }
+.summit p { color: #b6c8d6; margin-top: 10px; max-width: 48ch; }
+.summit .mono-line { font-family: "IBM Plex Mono", monospace; font-size: 13px; color: #7fb2ff; margin-top: 16px; }
+
+footer { padding: 30px 0 44px; color: var(--slate); font-size: 13px; }
+footer .mono { font-size: 12px; }
+.foot-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: baseline; margin-bottom: 6px; }
+.foot-dim { opacity: .75; font-size: 12px; }
+
+@media (max-width: 860px) {
+  .hero-inner { grid-template-columns: 1fr; padding: 56px 0 60px; }
+  .cap-grid { grid-template-columns: 1fr; }
+  .seq { grid-template-columns: 1fr; }
+  .leg + .leg { border-left: none; border-top: 2px dashed var(--line); padding: 18px 0 0; margin-top: 18px; }
+  .mock { grid-template-columns: 1fr; }
+  .shots { grid-template-columns: 1fr; }
+  .summit { padding: 38px 26px; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar-wrap">
+<div class="wrap">
+  <header class="topbar">
+    <div class="brand"><span class="tri"><svg width="20" height="20"
+      viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="5"
+      stroke-linecap="round" style="vertical-align:-4px">
+      <circle cx="14" cy="14" r="8"/><circle cx="50" cy="14" r="8"/>
+      <circle cx="14" cy="50" r="8"/><circle cx="50" cy="50" r="8"/>
+      <path d="M19 19l8 8m18-16l-8 8m-18 18l8-8m18 16l-8-8"/>
+      <rect x="25" y="25" width="14" height="14" rx="4" fill="currentColor" stroke="none"/>
+    </svg></span> SkyOps</div>
+    <div class="callsign">FLEET OPS / EPRZ 50.109N 22.023E</div>
+  </header>
+</div>
+</div>
+
+<div class="hero">
+  <video id="vidA" class="hero-video" autoplay muted loop playsinline
+         src="assets/clip7.mp4" aria-hidden="true"></video>
+  <video id="vidB" class="hero-video faded" muted loop playsinline
+         preload="none" aria-hidden="true"></video>
+  <div class="hero-shade"></div>
+  <div class="hero-grid"></div>
+  <div class="wrap hero-inner">
+    <div>
+      <div class="eyebrow">Drone fleet operations platform</div>
+      <h1>Every drone.<br><span class="alt">One screen.</span></h1>
+      <p class="lede">SkyOps puts your whole fleet on a live map: plan a mission
+      by clicking waypoints, launch, and watch telemetry stream in real time
+      while onboard AI reads the video - people, vehicles, fire, flood water.
+      From daily operations to crisis response, one screen runs it all.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="/app">Open the live demo</a>
+        <a class="btn btn-ghost" href="#capabilities">Capabilities</a>
+      </div>
+    </div>
+    <svg class="chart" viewBox="0 0 420 340" role="img" aria-label="Flight plan chart with waypoints">
+      <circle class="ring" cx="330" cy="70" r="34"/>
+      <circle class="ring" cx="330" cy="70" r="22"/>
+      <path class="flown" d="M40 300 L110 220"/>
+      <path class="route" d="M110 220 L150 120 L260 150 L330 70"/>
+      <g>
+        <polygon class="wp" points="40,292 47,306 33,306"/>
+        <text class="wp-label" x="26" y="324">HOME</text>
+        <polygon class="wp" points="150,112 157,126 143,126"/>
+        <text class="wp-label" x="136" y="102">WP1</text>
+        <polygon class="wp" points="260,142 267,156 253,156"/>
+        <text class="wp-label" x="246" y="176">WP2</text>
+        <polygon class="wp" points="330,62 337,76 323,76"/>
+        <text class="wp-label" x="352" y="66">TARGET</text>
+      </g>
+      <text class="wp-label" x="52" y="248" transform="rotate(-49 52 248)">SKY-01 &#9650;</text>
+    </svg>
+  </div>
+</div>
+
+<div class="wrap">
+
+<section id="capabilities">
+  <div class="sec-head">
+    <div class="eyebrow">Capabilities</div>
+    <h2>Command, watch, detect</h2>
+    <p>One dashboard covers the full operating loop - built for survey,
+    inspection and security teams that fly more than one aircraft.</p>
+  </div>
+  <div class="cap-grid">
+    <div class="cap"><div class="code">CAP-01</div><h3>Live fleet map</h3>
+      <p>Every aircraft on one map with heading, altitude, speed and battery,
+      refreshed five times per second over WebSocket.</p></div>
+    <div class="cap"><div class="code">CAP-02</div><h3>Click-to-plan missions</h3>
+      <p>Drop waypoints straight onto the map and launch. No mission files,
+      no desktop software, no training day.</p></div>
+    <div class="cap"><div class="code">CAP-03</div><h3>AI object detection</h3>
+      <p>A YOLOv8 neural network scans the camera feed and boxes people and
+      vehicles live, with running counts per class.</p></div>
+    <div class="cap"><div class="code">CAP-04</div><h3>In-flight control</h3>
+      <p>Hold, resume or recall any aircraft mid-mission with one click -
+      commands take effect in under a second.</p></div>
+    <div class="cap"><div class="code">CAP-05</div><h3>Failsafe by default</h3>
+      <p>Aircraft return home and land on their own at 25% battery, whether
+      or not an operator is watching.</p></div>
+    <div class="cap"><div class="code">CAP-06</div><h3>Hardware-ready</h3>
+      <p>Ships with a built-in flight simulator for demos and training;
+      the MAVLink connector points the same UI at real PX4 aircraft.</p></div>
+    <div class="cap"><div class="code">CAP-07</div><h3>Flight logs &amp; PDF reports</h3>
+      <p>Every flight is recorded automatically - route, telemetry, AI
+      detections - and turns into a clean PDF report with one click.</p></div>
+    <div class="cap"><div class="code">CAP-08</div><h3>Geofencing</h3>
+      <p>Draw no-fly zones on the map. Missions into a zone are rejected,
+      and an aircraft that strays inside returns home on its own.</p></div>
+    <div class="cap"><div class="code">CAP-09</div><h3>Live alert feed</h3>
+      <p>When the AI spots something new - a person, a vehicle - an alert
+      lands in the feed with a timestamp, as it happens.</p></div>
+    <div class="cap"><div class="code">CAP-10</div><h3>Area missions</h3>
+      <p>Draw an area on the map and the whole fleet splits it into
+      parallel coverage routes automatically - intent, not waypoints.</p></div>
+    <div class="cap"><div class="code">CAP-11</div><h3>Live share view</h3>
+      <p>One click copies a read-only link: crisis staff or stakeholders
+      watch everything live on any phone, and can command nothing.</p></div>
+    <div class="cap"><div class="code">CAP-12</div><h3>Airspace awareness</h3>
+      <p>Surrounding traffic on the same map - ADS-B aircraft, Remote ID
+      drones, unknown intruders - with conflict warnings and a UTM
+      check-in step on every launch.</p></div>
+  </div>
+</section>
+
+<section id="crisis">
+  <div class="sec-head">
+    <div class="eyebrow">Crisis operations</div>
+    <h2>When it matters most</h2>
+    <p>All three modes are live in the platform today - switch between
+    them in the dashboard's camera panel. The images below are real
+    output from our detection pipeline, not mockups, and every sortie
+    ends with a bilingual Situation Report PDF: detection timeline with
+    GPS coordinates, route map, and an SHA-256 evidence hash.</p>
+  </div>
+  <div class="cap-grid" style="margin-bottom: 28px;">
+    <div class="cap"><div class="code">MODE / FIRE</div><h3>Wildfire watch</h3>
+      <p>A fire-trained neural network spots flames and smoke from the
+      air and places them on the map while the front is still small.</p></div>
+    <div class="cap"><div class="code">MODE / FLOOD</div><h3>Flood mapping</h3>
+      <p>Computer vision outlines flooded terrain and measures coverage,
+      pass after pass - live situational awareness for crisis staff.</p></div>
+    <div class="cap"><div class="code">MODE / SEARCH</div><h3>Search &amp; rescue</h3>
+      <p>Drones split a search area into an automatic grid and the AI
+      flags every human shape for the operator to confirm.</p></div>
+  </div>
+  <div class="shots">
+    <figure>
+      <img class="shot" src="assets/img/ai-fire.jpg"
+        alt="AI fire detection boxes on real bushfire footage">
+      <figcaption class="shot-cap">FIRE DETECTION - REAL OUTPUT, REAL FOOTAGE</figcaption>
+    </figure>
+    <figure>
+      <img class="shot" src="assets/img/ai-flood.jpg"
+        alt="AI flood segmentation outlining water with coverage percent">
+      <figcaption class="shot-cap">FLOOD MAPPING - 60% COVERAGE MEASURED</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Mission profile</div>
+    <h2>A mission in four legs</h2>
+  </div>
+  <div class="seq">
+    <div class="leg"><div class="wp-tag">WP-1</div><h3>Plan</h3>
+      <p>Select an aircraft, click waypoints on the map, press Launch.</p></div>
+    <div class="leg"><div class="wp-tag">WP-2</div><h3>Fly</h3>
+      <p>The aircraft climbs to cruise altitude and flies the route leg by
+      leg while telemetry streams back.</p></div>
+    <div class="leg"><div class="wp-tag">WP-3</div><h3>Detect</h3>
+      <p>The AI watches the camera and counts what it sees - people,
+      vehicles, equipment - in real time.</p></div>
+    <div class="leg"><div class="wp-tag">WP-4</div><h3>Return</h3>
+      <p>Mission complete or battery low, the aircraft comes home and
+      lands itself.</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Operations view</div>
+    <h2>What the operator sees</h2>
+  </div>
+  <figure style="margin-bottom: 20px;">
+    <img class="shot" src="assets/img/dashboard.jpg"
+      alt="SkyOps dashboard: three drones flying missions over Jasionka airport">
+    <figcaption class="shot-cap">LIVE DASHBOARD - THREE AIRCRAFT ON MISSION OVER JASIONKA</figcaption>
+  </figure>
+  <div class="mock">
+    <div>
+      <h4>Fleet</h4>
+      <div class="fleet-card">
+        <div class="r1"><span class="nm">SKY-01</span><span class="badge">enroute</span></div>
+        <div class="tele"><span>ALT <b>50 m</b></span><span>SPD <b>12 m/s</b></span><span>BAT <b>72%</b></span></div>
+        <div class="bat"><div></div></div>
+      </div>
+    </div>
+    <div>
+      <h4>Camera - AI detection</h4>
+      <div class="det-line">
+        <span class="chip">person: 3</span>
+        <span class="chip">car: 2</span>
+        <span class="chip">truck: 1</span>
+      </div>
+      <div class="det-line" style="margin-top:10px;">
+        <span class="chip" style="background:#fde8e8; color:#c0392b;">
+          14:32:07 person detected (x3)</span>
+      </div>
+      <p style="margin-top:14px; font-size:14px; color:var(--ink-soft);">
+        Detections update every second, drawn as bounding boxes on the live
+        video - and each new object raises a timestamped alert.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <div class="eyebrow">Technical data</div>
+    <h2>Under the hood</h2>
+  </div>
+  <div class="specs-wrap">
+  <table class="specs">
+    <tr><th>Telemetry link</th><td>WebSocket, 5 Hz per aircraft, auto-reconnect</td></tr>
+    <tr><th>Video / AI</th><td>MJPEG stream at 15 fps, YOLOv8 inference on every frame</td></tr>
+    <tr><th>Backend</th><td>Python, FastAPI - deploys on any Linux box or cloud VM</td></tr>
+    <tr><th>Frontend</th><td>Browser-based, no install; works on any laptop or tablet</td></tr>
+    <tr><th>Flight records</th><td>Automatic per-flight logs; one-click PDF reports with route, telemetry and AI detections</td></tr>
+    <tr><th>Safety</th><td>Polygon no-fly zones enforced at planning and in flight; automatic return-to-home at low battery</td></tr>
+    <tr><th>Aircraft link</th><td>Built-in simulator today; MAVLink / MAVSDK connector for PX4 and ArduPilot aircraft</td></tr>
+  </table>
+  </div>
+</section>
+
+<section id="summit" style="border-top:none; padding-top: 0;">
+  <div class="summit">
+    <div class="hero-grid"></div>
+    <div class="summit-inner">
+      <div>
+        <div class="eyebrow">Live demo</div>
+        <h2>Carpathian Drone Summit 2026</h2>
+        <p>See SkyOps flying live - plan a mission yourself and watch the AI
+        pick out objects in the feed. Find us in the EXPO zone.</p>
+        <div class="mono-line">29-30 SEP 2026 / JASIONKA, RZESZOW, PL</div>
+      </div>
+      <a class="btn btn-primary" href="/app">Open the live demo</a>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-row">
+      <span class="mono">SKYOPS v0.4.0</span>
+      <span>Built in Rzeszow, Poland</span>
+    </div>
+    <div class="foot-row foot-dim">
+      <span class="mono">DEMO / CARPATHIAN DRONE SUMMIT 2026 / EXPO ZONE / 29-30 SEP</span>
+    </div>
+    <div class="foot-row foot-dim">
+      <span>Aerial footage: Mixkit (free license) &middot; Maps &copy; OpenStreetMap
+      contributors &middot; Detection: YOLOv8</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var clips = [
+    "assets/clip7.mp4",   // drone close-up in flight
+    "assets/clip1.mp4",   // mountain valley sunrise
+    "assets/clip5.mp4",   // wildfire front
+    "assets/clip6.mp4",   // aerial flood
+    "assets/clip8.mp4",   // operator hands on controller
+    "assets/clip9.mp4",   // drone over city
+    "assets/clip10.mp4",  // drone over nature
+    "assets/clip2.mp4",   // coast waves
+    "assets/clip3.mp4",   // seashore rocks
+    "assets/clip4.mp4"    // rocky cape
+  ];
+  var layers = [document.getElementById("vidA"), document.getElementById("vidB")];
+  if (!layers[0] || !layers[1]) return;
+  var active = 0, idx = 0;
+
+  function play(v) {
+    v.muted = true; // property, not just attribute - required by some browsers
+    var p = v.play();
+    if (p) p.catch(function () {});
+  }
+
+  play(layers[0]);
+  ["pointerdown", "touchstart", "keydown"].forEach(function (e) {
+    window.addEventListener(e, function () { play(layers[active]); },
+      { once: true, passive: true });
+  });
+
+  // scroll reveal: sections and cards fade up as they enter the viewport
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      && "IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll(
+      ".sec-head, .cap, .leg, .mock, figure, .specs-wrap, .summit"
+    ).forEach(function (el) { el.classList.add("reveal"); io.observe(el); });
+  }
+
+  setInterval(function () {
+    idx = (idx + 1) % clips.length;
+    var next = layers[1 - active];
+    var cur = layers[active];
+    next.src = clips[idx];
+    next.addEventListener("canplay", function go() {
+      next.removeEventListener("canplay", go);
+      play(next);
+      next.classList.remove("faded");
+      cur.classList.add("faded");
+      active = 1 - active;
+    });
+    next.load();
+  }, 8000);
+})();
+</script>
+</body>
+</html>

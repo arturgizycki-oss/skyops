@@ -1,0 +1,25 @@
+# Large binaries - not needed to run or review the project
+hackathon/models/
+backend/tiles/
+backend/logs/
+landing/assets/*.mp4
+
+# Python
+__pycache__/
+*.py[cod]
+*.pt
+*.onnx
+venv/
+.venv/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Internal business material - not part of the project itself
+sales/
+summit-b2b.md
+hackathon/pitch-5min.md
+hackathon/prep.md
+hackathon/slides-outline.md
+operator-guide.md

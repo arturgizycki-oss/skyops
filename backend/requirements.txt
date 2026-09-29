@@ -1,0 +1,5 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+# AI video detection (optional but recommended for the full demo)
+ultralytics>=8.2
+opencv-python>=4.9
