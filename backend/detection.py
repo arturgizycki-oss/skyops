@@ -44,6 +44,11 @@ except ImportError:
 FLOOD_BROWN = ((8, 40, 60), (30, 200, 220))
 FLOOD_TEAL = ((35, 15, 90), (100, 140, 255))
 FLOOD_ALERT_PCT = 40
+# One label for flood observations, used for BOTH the alert and the logged
+# detection. They must be identical: the operator's verdict is matched back
+# to the logged observation by label, so two different strings silently
+# break the confirm -> report chain.
+FLOOD_LABEL = "water %"
 
 BOX_COLOR = (235, 99, 37)     # BGR: SkyOps blue
 LABEL_COLOR = (255, 255, 255)
@@ -216,10 +221,10 @@ class VideoDetector:
             counts: dict[str, int] = {}
             if cfg["flood"]:
                 frame, coverage = self._flood_annotate(frame)
-                counts = {"water %": round(coverage * 100)}
+                counts = {FLOOD_LABEL: round(coverage * 100)}
                 with self._lock:
                     if coverage * 100 >= FLOOD_ALERT_PCT:
-                        self._alert("flood water", round(coverage * 100), now, None)
+                        self._alert(FLOOD_LABEL, round(coverage * 100), now, None)
             elif model is not None:
                 counts, best = self._yolo_annotate(frame, model, cfg["conf"])
                 with self._lock:

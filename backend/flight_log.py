@@ -124,9 +124,22 @@ class FlightRecorder:
             json.dumps(rec), encoding="utf-8")
         self._prune(keep=500)
 
+    @staticmethod
+    def _started(path) -> float:
+        """Sortie start time from the record itself.
+
+        File mtime is not reliable here - it has been observed to
+        disagree with the recorded time by hours, which silently buried
+        the newest sortie underneath older ones. The record knows when
+        it started; trust that.
+        """
+        try:
+            return float(json.loads(path.read_text(encoding="utf-8"))["start"])
+        except Exception:
+            return path.stat().st_mtime
+
     def _prune(self, keep: int) -> None:
-        files = sorted(LOGS_DIR.glob("*.json"),
-                       key=lambda p: p.stat().st_mtime, reverse=True)
+        files = sorted(LOGS_DIR.glob("*.json"), key=self._started, reverse=True)
         for old in files[keep:]:
             old.unlink(missing_ok=True)
 
@@ -135,7 +148,7 @@ class FlightRecorder:
     def list_logs(self) -> list[dict]:
         out = []
         for f in sorted(LOGS_DIR.glob("*.json"),
-                        key=lambda p: p.stat().st_mtime, reverse=True)[:50]:
+                        key=self._started, reverse=True)[:50]:
             rec = json.loads(f.read_text(encoding="utf-8"))
             out.append({
                 "id": rec["id"], "drone": rec["drone"],
@@ -336,6 +349,35 @@ def render_sitrep(rec: dict) -> bytes:
     lines = textwrap.wrap(text, 96)[:2]
     for i, ln in enumerate(lines):
         c.drawString(m, y2 - 16 - i * 14, ln)
+
+    # road passability - the actual decision, for flood sorties
+    road_lines = []
+    if mode == "flood":
+        try:
+            from roads import network as _rn
+            if _rn.loaded:
+                obs = [e for e in rec.get("events", [])
+                       if e.get("label") == "water %"]
+                road_lines = _rn.impassable_summary(obs)[:5]
+        except Exception:
+            road_lines = []
+
+    y_roads = y2 - 44 - (14 if len(lines) > 1 else 0)
+    if road_lines:
+        label(m, y_roads, "Przejezdnosc drog / Road passability")
+        c.setFont("Courier", 8.5)
+        yy = y_roads - 13
+        for ln in road_lines:
+            c.setFillColor(colors.HexColor("#c0392b")
+                           if ln.startswith("NIEPRZEJEZDNA") else INK)
+            c.drawString(m, yy, ln[:104])
+            yy -= 11
+        c.setFillColor(SLATE)
+        c.setFont("Courier", 7.5)
+        c.drawString(m, yy - 1,
+                     "Drogi bez obserwacji sa oznaczone NIEZNANA - nie sa "
+                     "raportowane jako przejezdne.")
+        y2 = yy - 14
 
     # detection timeline
     y3 = y2 - 44 - (14 if len(lines) > 1 else 0)

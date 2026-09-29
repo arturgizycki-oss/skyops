@@ -22,6 +22,7 @@ from detection import detector
 from flight_log import recorder, render_pdf, render_sitrep
 from geofence import geofences
 from hydro import hydro
+from roads import network as roadnet
 from sim import SimEngine, Waypoint
 from swarm import swarm
 
@@ -324,6 +325,37 @@ def set_alert_status(alert_id: int, body: AlertStatusIn):
     if not detector.set_alert_status(alert_id, body.status):
         raise HTTPException(404, "alert not found")
     return {"ok": True, "id": alert_id, "status": body.status}
+
+
+def _flood_observations(log_id: str | None = None) -> list[dict]:
+    """Flood observations from a sortie: position plus coverage percent."""
+    logs = recorder.list_logs()
+    if log_id is None:
+        flood = [l for l in logs if l.get("detections", {}).get("water %")]
+        if not flood:
+            return []
+        log_id = flood[0]["id"]
+    rec = recorder.get(log_id)
+    if not rec:
+        return []
+    return [e for e in rec.get("events", []) if e.get("label") == "water %"]
+
+
+@app.get("/api/roads")
+def road_status(log: str | None = None):
+    """Which roads are passable, from the flood observations of a sortie.
+
+    A coverage percentage is not a decision. "Droga 878 nieprzejezdna"
+    is. Roads nobody has flown over are reported as `nieznana`, never
+    as clear - an unchecked road must not look safe.
+    """
+    if not roadnet.loaded:
+        raise HTTPException(503, "road network not cached")
+    obs = _flood_observations(log)
+    result = roadnet.assess(obs)
+    result["observations"] = len(obs)
+    result["summary"] = roadnet.impassable_summary(obs)
+    return result
 
 
 @app.get("/api/hydro")

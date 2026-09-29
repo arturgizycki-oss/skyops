@@ -932,3 +932,55 @@ async function refreshHydro() {
 
 refreshHydro();
 setInterval(refreshHydro, 30000);
+
+/* --- Road passability: the decision, drawn on the map ---
+   Roads nobody flew over stay unmarked. An unchecked road must never
+   look clear, so we draw only what we actually observed. */
+
+const roadState = { layer: null };
+const ROAD_COLOR = {
+  "nieprzejezdna": "#c0392b",
+  "podejrzana": "#9a6200",
+  "przejezdna": "#148a5c",
+};
+
+async function refreshRoads() {
+  try {
+    const d = await (await fetch("/api/roads")).json();
+    if (!d.assessed) return;
+    if (roadState.layer) map.removeLayer(roadState.layer);
+    roadState.layer = L.layerGroup();
+    for (const r of d.assessed) {
+      const col = ROAD_COLOR[r.status];
+      if (!col) continue;
+      L.polyline(r.pts, {
+        color: col, weight: 6, opacity: 0.85,
+        dashArray: r.status === "podejrzana" ? "10 6" : null,
+      }).bindTooltip(
+        `${r.name || r.class}<br><b>${r.status.toUpperCase()}</b>`
+        + (r.coverage_pct != null ? `<br>zalanie ${Math.round(r.coverage_pct)}%` : ""),
+        { direction: "top" }
+      ).addTo(roadState.layer);
+    }
+    roadState.layer.addTo(map);
+
+    const el = document.getElementById("roads-summary");
+    if (el) {
+      const c = d.counts || {};
+      el.innerHTML =
+        `<b style="color:${ROAD_COLOR['nieprzejezdna']}">${c["nieprzejezdna"] || 0}</b> nieprzejezdnych &middot; `
+        + `<b style="color:${ROAD_COLOR['podejrzana']}">${c["podejrzana"] || 0}</b> podejrzanych &middot; `
+        + `<b style="color:${ROAD_COLOR['przejezdna']}">${c["przejezdna"] || 0}</b> przejezdnych<br>`
+        + `<span class="hint">${c["nieznana"] || 0} dróg bez obserwacji — nie raportujemy ich jako przejezdne.</span>`;
+    }
+    const list = document.getElementById("roads-list");
+    if (list) {
+      list.innerHTML = (d.summary || []).slice(0, 6).map(s =>
+        `<div class="road-row ${s.startsWith("NIEPRZEJEZDNA") ? "bad" : "warn"}">${s}</div>`
+      ).join("") || '<span class="hint">Brak obserwacji zalania.</span>';
+    }
+  } catch { /* backend not ready */ }
+}
+
+refreshRoads();
+setInterval(refreshRoads, 15000);

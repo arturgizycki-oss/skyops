@@ -541,3 +541,15 @@ body.viewer #swarm-panel #swarm-hint { display: none; }
 .alert-row .ar-sub { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
 .alert-row .ar-sub .age { margin-left: 0; }
 .alert-row .adj { margin-left: auto; }
+
+/* --- Road passability --- */
+.road-row {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px;
+  padding: 3px 6px;
+  border-bottom: 1px solid var(--line);
+  border-left: 3px solid var(--line-strong);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.road-row.bad { border-left-color: #c0392b; background: #fdf0ef; }
+.road-row.warn { border-left-color: var(--amber); background: #fdf6e8; }
