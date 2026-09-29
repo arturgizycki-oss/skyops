@@ -138,9 +138,20 @@ class FlightRecorder:
         except Exception:
             return path.stat().st_mtime
 
+    # never discard a log written within this window, whatever its
+    # timestamp claims - a clock that jumps backwards must not be able to
+    # delete the sortie that was just flown
+    PRUNE_GRACE_S = 3600
+
     def _prune(self, keep: int) -> None:
+        now = time.time()
         files = sorted(LOGS_DIR.glob("*.json"), key=self._started, reverse=True)
         for old in files[keep:]:
+            try:
+                if now - old.stat().st_mtime < self.PRUNE_GRACE_S:
+                    continue          # written moments ago; keep it
+            except OSError:
+                continue
             old.unlink(missing_ok=True)
 
     # ---- queries ----
