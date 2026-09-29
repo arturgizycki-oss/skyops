@@ -34,6 +34,15 @@ body {
 .wrap { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
 
 /* ---------- header ---------- */
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+.lang-land { display: inline-flex; border: 1px solid rgba(255,255,255,.28); border-radius: 3px; overflow: hidden; }
+.lang-land button {
+  font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .06em;
+  padding: 3px 8px; border: 0; cursor: pointer;
+  background: transparent; color: rgba(255,255,255,.7);
+}
+.lang-land button + button { border-left: 1px solid rgba(255,255,255,.2); }
+.lang-land button.on { background: #fff; color: #132430; }
 .topbar-wrap {
   position: sticky; top: 0; z-index: 50;
   background: rgba(243, 247, 249, .72);
@@ -314,7 +323,12 @@ footer .mono { font-size: 12px; }
       <path d="M19 19l8 8m18-16l-8 8m-18 18l8-8m18 16l-8-8"/>
       <rect x="25" y="25" width="14" height="14" rx="4" fill="currentColor" stroke="none"/>
     </svg></span> SkyOps</div>
-    <div class="callsign">FLEET OPS / EPRZ 50.109N 22.023E</div>
+    <div class="topbar-right">
+      <div class="lang-land" id="lang-land">
+        <button data-lang="pl" class="on">PL</button><button data-lang="en">EN</button>
+      </div>
+      <div class="callsign" data-i18n="L001">FLEET OPS / EPRZ 50.109N 22.023E</div>
+    </div>
   </header>
 </div>
 </div>
@@ -328,15 +342,15 @@ footer .mono { font-size: 12px; }
   <div class="hero-grid"></div>
   <div class="wrap hero-inner">
     <div>
-      <div class="eyebrow">Drone fleet operations platform</div>
-      <h1>Every drone.<br><span class="alt">One screen.</span></h1>
-      <p class="lede">SkyOps puts your whole fleet on a live map: plan a mission
+      <div class="eyebrow" data-i18n="L002">Drone fleet operations platform</div>
+      <h1 data-i18n="L200">Every drone.<br><span class="alt">One screen.</span></h1>
+      <p class="lede" data-i18n="L004">SkyOps puts your whole fleet on a live map: plan a mission
       by clicking waypoints, launch, and watch telemetry stream in real time
       while onboard AI reads the video - people, vehicles, fire, flood water.
       From daily operations to crisis response, one screen runs it all.</p>
       <div class="cta-row">
-        <a class="btn btn-primary" href="/app">Open the live demo</a>
-        <a class="btn btn-ghost" href="#capabilities">Capabilities</a>
+        <a class="btn btn-primary" href="/app" data-i18n="L005">Open the live demo</a>
+        <a class="btn btn-ghost" href="#capabilities" data-i18n="L006">Capabilities</a>
       </div>
     </div>
     <svg class="chart" viewBox="0 0 420 340" role="img" aria-label="Flight plan chart with waypoints">
@@ -363,32 +377,32 @@ footer .mono { font-size: 12px; }
 
 <section id="uncertainty">
   <div class="sec-head">
-    <div class="eyebrow">Decisions under uncertainty</div>
-    <h2>The system never claims<br>to be more certain than it is</h2>
-    <p>A river gauge knows the water level but not its extent. A drone
+    <div class="eyebrow" data-i18n="L007">Decisions under uncertainty</div>
+    <h2 data-i18n="L201">The system never claims<br>to be more certain than it is</h2>
+    <p data-i18n="L008">A river gauge knows the water level but not its extent. A drone
     sees the extent but not always the meaning. Neither is enough on its
     own, and pretending otherwise is how people get sent down a flooded
     road.</p>
   </div>
   <div class="cap-grid">
     <div class="cap">
-      <div class="code">IMGW</div>
-      <h3>Official gauges trigger the flight</h3>
-      <p>Live river levels from Poland's public IMGW feed, with the
+      <div class="code" data-i18n="L009">IMGW</div>
+      <h3 data-i18n="L010">Official gauges trigger the flight</h3>
+      <p data-i18n="L011">Live river levels from Poland's public IMGW feed, with the
       official warning and alarm thresholds. A gauge crossing its
       threshold is the reason to fly - not a guess.</p>
     </div>
     <div class="cap">
-      <div class="code">HUMAN</div>
-      <h3>The operator decides, not the AI</h3>
-      <p>Every detection carries the model's own confidence. The operator
+      <div class="code" data-i18n="L012">HUMAN</div>
+      <h3 data-i18n="L013">The operator decides, not the AI</h3>
+      <p data-i18n="L014">Every detection carries the model's own confidence. The operator
       confirms or rejects it, and the report separates what a person
       verified from what only the machine proposed.</p>
     </div>
     <div class="cap">
-      <div class="code">ROADS</div>
-      <h3>From a percentage to a decision</h3>
-      <p>Flood coverage becomes road passability: which stretch is
+      <div class="code" data-i18n="L015">ROADS</div>
+      <h3 data-i18n="L016">From a percentage to a decision</h3>
+      <p data-i18n="L017">Flood coverage becomes road passability: which stretch is
       impassable, which is clear. Roads nobody flew over are marked
       unknown - never reported as safe.</p>
     </div>
@@ -397,47 +411,47 @@ footer .mono { font-size: 12px; }
 
 <section id="capabilities">
   <div class="sec-head">
-    <div class="eyebrow">Capabilities</div>
-    <h2>Command, watch, detect</h2>
-    <p>One dashboard covers the full operating loop - built for survey,
+    <div class="eyebrow" data-i18n="L018">Capabilities</div>
+    <h2 data-i18n="L019">Command, watch, detect</h2>
+    <p data-i18n="L020">One dashboard covers the full operating loop - built for survey,
     inspection and security teams that fly more than one aircraft.</p>
   </div>
   <div class="cap-grid">
-    <div class="cap"><div class="code">CAP-01</div><h3>Live fleet map</h3>
-      <p>Every aircraft on one map with heading, altitude, speed and battery,
+    <div class="cap"><div class="code" data-i18n="L021">CAP-01</div><h3 data-i18n="L022">Live fleet map</h3>
+      <p data-i18n="L023">Every aircraft on one map with heading, altitude, speed and battery,
       refreshed five times per second over WebSocket.</p></div>
-    <div class="cap"><div class="code">CAP-02</div><h3>Click-to-plan missions</h3>
-      <p>Drop waypoints straight onto the map and launch. No mission files,
+    <div class="cap"><div class="code" data-i18n="L024">CAP-02</div><h3 data-i18n="L025">Click-to-plan missions</h3>
+      <p data-i18n="L026">Drop waypoints straight onto the map and launch. No mission files,
       no desktop software, no training day.</p></div>
-    <div class="cap"><div class="code">CAP-03</div><h3>AI object detection</h3>
-      <p>A YOLOv8 neural network scans the camera feed and boxes people and
+    <div class="cap"><div class="code" data-i18n="L027">CAP-03</div><h3 data-i18n="L028">AI object detection</h3>
+      <p data-i18n="L029">A YOLOv8 neural network scans the camera feed and boxes people and
       vehicles live, with running counts per class.</p></div>
-    <div class="cap"><div class="code">CAP-04</div><h3>In-flight control</h3>
-      <p>Hold, resume or recall any aircraft mid-mission with one click -
+    <div class="cap"><div class="code" data-i18n="L030">CAP-04</div><h3 data-i18n="L031">In-flight control</h3>
+      <p data-i18n="L032">Hold, resume or recall any aircraft mid-mission with one click -
       commands take effect in under a second.</p></div>
-    <div class="cap"><div class="code">CAP-05</div><h3>Failsafe by default</h3>
-      <p>Aircraft return home and land on their own at 25% battery, whether
+    <div class="cap"><div class="code" data-i18n="L033">CAP-05</div><h3 data-i18n="L034">Failsafe by default</h3>
+      <p data-i18n="L035">Aircraft return home and land on their own at 25% battery, whether
       or not an operator is watching.</p></div>
-    <div class="cap"><div class="code">CAP-06</div><h3>Hardware-ready</h3>
-      <p>Ships with a built-in flight simulator for demos and training;
+    <div class="cap"><div class="code" data-i18n="L036">CAP-06</div><h3 data-i18n="L037">Hardware-ready</h3>
+      <p data-i18n="L038">Ships with a built-in flight simulator for demos and training;
       the MAVLink connector points the same UI at real PX4 aircraft.</p></div>
-    <div class="cap"><div class="code">CAP-07</div><h3>Flight logs &amp; PDF reports</h3>
-      <p>Every flight is recorded automatically - route, telemetry, AI
+    <div class="cap"><div class="code" data-i18n="L039">CAP-07</div><h3 data-i18n="L040">Flight logs &amp; PDF reports</h3>
+      <p data-i18n="L041">Every flight is recorded automatically - route, telemetry, AI
       detections - and turns into a clean PDF report with one click.</p></div>
-    <div class="cap"><div class="code">CAP-08</div><h3>Geofencing</h3>
-      <p>Draw no-fly zones on the map. Missions into a zone are rejected,
+    <div class="cap"><div class="code" data-i18n="L042">CAP-08</div><h3 data-i18n="L043">Geofencing</h3>
+      <p data-i18n="L044">Draw no-fly zones on the map. Missions into a zone are rejected,
       and an aircraft that strays inside returns home on its own.</p></div>
-    <div class="cap"><div class="code">CAP-09</div><h3>Live alert feed</h3>
-      <p>When the AI spots something new - a person, a vehicle - an alert
+    <div class="cap"><div class="code" data-i18n="L045">CAP-09</div><h3 data-i18n="L046">Live alert feed</h3>
+      <p data-i18n="L047">When the AI spots something new - a person, a vehicle - an alert
       lands in the feed with a timestamp, as it happens.</p></div>
-    <div class="cap"><div class="code">CAP-10</div><h3>Area missions</h3>
-      <p>Draw an area on the map and the whole fleet splits it into
+    <div class="cap"><div class="code" data-i18n="L048">CAP-10</div><h3 data-i18n="L049">Area missions</h3>
+      <p data-i18n="L050">Draw an area on the map and the whole fleet splits it into
       parallel coverage routes automatically - intent, not waypoints.</p></div>
-    <div class="cap"><div class="code">CAP-11</div><h3>Live share view</h3>
-      <p>One click copies a read-only link: crisis staff or stakeholders
+    <div class="cap"><div class="code" data-i18n="L051">CAP-11</div><h3 data-i18n="L052">Live share view</h3>
+      <p data-i18n="L053">One click copies a read-only link: crisis staff or stakeholders
       watch everything live on any phone, and can command nothing.</p></div>
-    <div class="cap"><div class="code">CAP-12</div><h3>Airspace awareness</h3>
-      <p>Surrounding traffic on the same map - ADS-B aircraft, Remote ID
+    <div class="cap"><div class="code" data-i18n="L054">CAP-12</div><h3 data-i18n="L055">Airspace awareness</h3>
+      <p data-i18n="L056">Surrounding traffic on the same map - ADS-B aircraft, Remote ID
       drones, unknown intruders - with conflict warnings and a UTM
       check-in step on every launch.</p></div>
   </div>
@@ -445,23 +459,23 @@ footer .mono { font-size: 12px; }
 
 <section id="crisis">
   <div class="sec-head">
-    <div class="eyebrow">Crisis operations</div>
-    <h2>When it matters most</h2>
-    <p>All three modes are live in the platform today - switch between
+    <div class="eyebrow" data-i18n="L057">Crisis operations</div>
+    <h2 data-i18n="L058">When it matters most</h2>
+    <p data-i18n="L059">All three modes are live in the platform today - switch between
     them in the dashboard's camera panel. The images below are real
     output from our detection pipeline, not mockups, and every sortie
     ends with a bilingual Situation Report PDF: detection timeline with
     GPS coordinates, route map, and an SHA-256 evidence hash.</p>
   </div>
   <div class="cap-grid" style="margin-bottom: 28px;">
-    <div class="cap"><div class="code">MODE / FIRE</div><h3>Wildfire watch</h3>
-      <p>A fire-trained neural network spots flames and smoke from the
+    <div class="cap"><div class="code" data-i18n="L060">MODE / FIRE</div><h3 data-i18n="L061">Wildfire watch</h3>
+      <p data-i18n="L062">A fire-trained neural network spots flames and smoke from the
       air and places them on the map while the front is still small.</p></div>
-    <div class="cap"><div class="code">MODE / FLOOD</div><h3>Flood mapping</h3>
-      <p>Computer vision outlines flooded terrain and measures coverage,
+    <div class="cap"><div class="code" data-i18n="L063">MODE / FLOOD</div><h3 data-i18n="L064">Flood mapping</h3>
+      <p data-i18n="L065">Computer vision outlines flooded terrain and measures coverage,
       pass after pass - live situational awareness for crisis staff.</p></div>
-    <div class="cap"><div class="code">MODE / SEARCH</div><h3>Search &amp; rescue</h3>
-      <p>Drones split a search area into an automatic grid and the AI
+    <div class="cap"><div class="code" data-i18n="L066">MODE / SEARCH</div><h3 data-i18n="L067">Search &amp; rescue</h3>
+      <p data-i18n="L068">Drones split a search area into an automatic grid and the AI
       flags every human shape for the operator to confirm.</p></div>
   </div>
   <div class="shots">
@@ -480,28 +494,28 @@ footer .mono { font-size: 12px; }
 
 <section>
   <div class="sec-head">
-    <div class="eyebrow">Mission profile</div>
-    <h2>A mission in four legs</h2>
+    <div class="eyebrow" data-i18n="L069">Mission profile</div>
+    <h2 data-i18n="L070">A mission in four legs</h2>
   </div>
   <div class="seq">
-    <div class="leg"><div class="wp-tag">WP-1</div><h3>Plan</h3>
-      <p>Select an aircraft, click waypoints on the map, press Launch.</p></div>
-    <div class="leg"><div class="wp-tag">WP-2</div><h3>Fly</h3>
-      <p>The aircraft climbs to cruise altitude and flies the route leg by
+    <div class="leg"><div class="wp-tag" data-i18n="L071">WP-1</div><h3 data-i18n="L072">Plan</h3>
+      <p data-i18n="L073">Select an aircraft, click waypoints on the map, press Launch.</p></div>
+    <div class="leg"><div class="wp-tag" data-i18n="L074">WP-2</div><h3 data-i18n="L075">Fly</h3>
+      <p data-i18n="L076">The aircraft climbs to cruise altitude and flies the route leg by
       leg while telemetry streams back.</p></div>
-    <div class="leg"><div class="wp-tag">WP-3</div><h3>Detect</h3>
-      <p>The AI watches the camera and counts what it sees - people,
+    <div class="leg"><div class="wp-tag" data-i18n="L077">WP-3</div><h3 data-i18n="L078">Detect</h3>
+      <p data-i18n="L079">The AI watches the camera and counts what it sees - people,
       vehicles, equipment - in real time.</p></div>
-    <div class="leg"><div class="wp-tag">WP-4</div><h3>Return</h3>
-      <p>Mission complete or battery low, the aircraft comes home and
+    <div class="leg"><div class="wp-tag" data-i18n="L080">WP-4</div><h3 data-i18n="L081">Return</h3>
+      <p data-i18n="L082">Mission complete or battery low, the aircraft comes home and
       lands itself.</p></div>
   </div>
 </section>
 
 <section>
   <div class="sec-head">
-    <div class="eyebrow">Operations view</div>
-    <h2>What the operator sees</h2>
+    <div class="eyebrow" data-i18n="L083">Operations view</div>
+    <h2 data-i18n="L084">What the operator sees</h2>
   </div>
   <figure style="margin-bottom: 20px;">
     <img class="shot" src="assets/img/dashboard.jpg"
@@ -510,25 +524,25 @@ footer .mono { font-size: 12px; }
   </figure>
   <div class="mock">
     <div>
-      <h4>Fleet</h4>
+      <h4 data-i18n="L085">Fleet</h4>
       <div class="fleet-card">
-        <div class="r1"><span class="nm">SKY-01</span><span class="badge">enroute</span></div>
+        <div class="r1"><span class="nm" data-i18n="L086">SKY-01</span><span class="badge" data-i18n="L087">enroute</span></div>
         <div class="tele"><span>ALT <b>50 m</b></span><span>SPD <b>12 m/s</b></span><span>BAT <b>72%</b></span></div>
         <div class="bat"><div></div></div>
       </div>
     </div>
     <div>
-      <h4>Camera - AI detection</h4>
+      <h4 data-i18n="L088">Camera - AI detection</h4>
       <div class="det-line">
-        <span class="chip">person: 3</span>
-        <span class="chip">car: 2</span>
-        <span class="chip">truck: 1</span>
+        <span class="chip" data-i18n="L089">person: 3</span>
+        <span class="chip" data-i18n="L090">car: 2</span>
+        <span class="chip" data-i18n="L091">truck: 1</span>
       </div>
       <div class="det-line" style="margin-top:10px;">
-        <span class="chip" style="background:#fde8e8; color:#c0392b;">
+        <span class="chip" style="background:#fde8e8; color:#c0392b;" data-i18n="L092">
           14:32:07 person detected (x3)</span>
       </div>
-      <p style="margin-top:14px; font-size:14px; color:var(--ink-soft);">
+      <p style="margin-top:14px; font-size:14px; color:var(--ink-soft);" data-i18n="L093">
         Detections update every second, drawn as bounding boxes on the live
         video - and each new object raises a timestamped alert.</p>
     </div>
@@ -537,18 +551,18 @@ footer .mono { font-size: 12px; }
 
 <section>
   <div class="sec-head">
-    <div class="eyebrow">Technical data</div>
-    <h2>Under the hood</h2>
+    <div class="eyebrow" data-i18n="L094">Technical data</div>
+    <h2 data-i18n="L095">Under the hood</h2>
   </div>
   <div class="specs-wrap">
   <table class="specs">
-    <tr><th>Telemetry link</th><td>WebSocket, 5 Hz per aircraft, auto-reconnect</td></tr>
-    <tr><th>Video / AI</th><td>MJPEG stream at 15 fps, YOLOv8 inference on every frame</td></tr>
-    <tr><th>Backend</th><td>Python, FastAPI - deploys on any Linux box or cloud VM</td></tr>
-    <tr><th>Frontend</th><td>Browser-based, no install; works on any laptop or tablet</td></tr>
-    <tr><th>Flight records</th><td>Automatic per-flight logs; one-click PDF reports with route, telemetry and AI detections</td></tr>
-    <tr><th>Safety</th><td>Polygon no-fly zones enforced at planning and in flight; automatic return-to-home at low battery</td></tr>
-    <tr><th>Aircraft link</th><td>Built-in simulator today; MAVLink / MAVSDK connector for PX4 and ArduPilot aircraft</td></tr>
+    <tr><th data-i18n="L096">Telemetry link</th><td data-i18n="L097">WebSocket, 5 Hz per aircraft, auto-reconnect</td></tr>
+    <tr><th data-i18n="L098">Video / AI</th><td data-i18n="L099">MJPEG stream at 15 fps, YOLOv8 inference on every frame</td></tr>
+    <tr><th data-i18n="L100">Backend</th><td data-i18n="L101">Python, FastAPI - deploys on any Linux box or cloud VM</td></tr>
+    <tr><th data-i18n="L102">Frontend</th><td data-i18n="L103">Browser-based, no install; works on any laptop or tablet</td></tr>
+    <tr><th data-i18n="L104">Flight records</th><td data-i18n="L105">Automatic per-flight logs; one-click PDF reports with route, telemetry and AI detections</td></tr>
+    <tr><th data-i18n="L106">Safety</th><td data-i18n="L107">Polygon no-fly zones enforced at planning and in flight; automatic return-to-home at low battery</td></tr>
+    <tr><th data-i18n="L108">Aircraft link</th><td data-i18n="L109">Built-in simulator today; MAVLink / MAVSDK connector for PX4 and ArduPilot aircraft</td></tr>
   </table>
   </div>
 </section>
@@ -558,13 +572,13 @@ footer .mono { font-size: 12px; }
     <div class="hero-grid"></div>
     <div class="summit-inner">
       <div>
-        <div class="eyebrow">Live demo</div>
-        <h2>Carpathian Drone Summit 2026</h2>
-        <p>See SkyOps flying live - plan a mission yourself and watch the AI
+        <div class="eyebrow" data-i18n="L110">Live demo</div>
+        <h2 data-i18n="L111">Carpathian Drone Summit 2026</h2>
+        <p data-i18n="L112">See SkyOps flying live - plan a mission yourself and watch the AI
         pick out objects in the feed. Find us in the EXPO zone.</p>
-        <div class="mono-line">29-30 SEP 2026 / JASIONKA, RZESZOW, PL</div>
+        <div class="mono-line" data-i18n="L113">29-30 SEP 2026 / JASIONKA, RZESZOW, PL</div>
       </div>
-      <a class="btn btn-primary" href="/app">Open the live demo</a>
+      <a class="btn btn-primary" href="/app" data-i18n="L114">Open the live demo</a>
     </div>
   </div>
 </section>
@@ -574,14 +588,14 @@ footer .mono { font-size: 12px; }
 <footer>
   <div class="wrap">
     <div class="foot-row">
-      <span class="mono">SKYOPS v0.4.0</span>
-      <span>Built in Rzeszow, Poland</span>
+      <span class="mono" data-i18n="L115">SKYOPS v0.4.0</span>
+      <span data-i18n="L116">Built in Rzeszow, Poland</span>
     </div>
     <div class="foot-row foot-dim">
-      <span class="mono">DEMO / CARPATHIAN DRONE SUMMIT 2026 / EXPO ZONE / 29-30 SEP</span>
+      <span class="mono" data-i18n="L117">DEMO / CARPATHIAN DRONE SUMMIT 2026 / EXPO ZONE / 29-30 SEP</span>
     </div>
     <div class="foot-row foot-dim">
-      <span>Aerial footage: Mixkit (free license) &middot; Maps &copy; OpenStreetMap
+      <span data-i18n="L118">Aerial footage: Mixkit (free license) &middot; Maps &copy; OpenStreetMap
       contributors &middot; Detection: YOLOv8</span>
     </div>
   </div>
@@ -646,5 +660,6 @@ footer .mono { font-size: 12px; }
   }, 8000);
 })();
 </script>
+<script src="/assets/lang.js"></script>
 </body>
 </html>
