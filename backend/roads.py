@@ -91,10 +91,15 @@ class RoadNetwork:
                     continue
                 pct = float(o.get("count", 0))
                 confirmed = o.get("status") == "confirmed"
+                # A finding whose position was unreliable cannot close a
+                # road. Saying "impassable" sends a crew somewhere, and
+                # we do not know where this was observed.
+                pos_ok = o.get("pos", "ok") == "ok"
                 if pct >= FLOODED_PCT:
-                    cand = IMPASSABLE if confirmed else SUSPECT
+                    cand = IMPASSABLE if (confirmed and pos_ok) else SUSPECT
                 elif pct <= CLEAR_PCT:
-                    cand = PASSABLE
+                    # nor can it clear one - an unchecked road stays unknown
+                    cand = PASSABLE if pos_ok else UNKNOWN
                 else:
                     cand = SUSPECT
                 # worst verdict wins: never downgrade a hazard

@@ -564,3 +564,23 @@ body.viewer #swarm-panel #swarm-hint { display: none; }
 }
 .lang button + button { border-left: 1px solid var(--line); }
 .lang button.on { background: var(--ink); color: #fff; }
+
+/* --- Position quality --- */
+.nav-state {
+  font-size: 13px; line-height: 1.5; margin-bottom: 8px;
+  font-family: "IBM Plex Mono", monospace;
+}
+.nav-state .sim {
+  font-size: 9px; letter-spacing: .06em;
+  background: var(--ink); color: #fff;
+  border-radius: 2px; padding: 1px 4px; margin-left: 4px;
+}
+#nav-controls .btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+body.viewer #nav-panel #nav-controls { display: none; }
+.alert-row .posflag {
+  font-family: "IBM Plex Mono", monospace; font-size: 9px;
+  letter-spacing: .04em; text-transform: uppercase;
+  border-radius: 2px; padding: 1px 5px; margin-left: 4px;
+}
+.alert-row .posflag.degraded { background: #fdf6e8; color: var(--amber); border: 1px solid var(--amber); }
+.alert-row .posflag.denied { background: #fdf0ef; color: #c0392b; border: 1px solid #c0392b; }

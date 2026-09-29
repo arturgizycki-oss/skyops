@@ -32,6 +32,15 @@ GREEN = colors.HexColor("#148a5c")
 LINE = colors.HexColor("#cfdde5")
 
 
+def _nav_state() -> str:
+    """Position quality when an observation was made, for the record."""
+    try:
+        from navquality import nav
+        return nav.state
+    except Exception:
+        return "ok"
+
+
 class FlightRecorder:
     def __init__(self) -> None:
         LOGS_DIR.mkdir(exist_ok=True)
@@ -91,6 +100,7 @@ class FlightRecorder:
                                 "label": label, "count": count,
                                 "lat": t["lat"], "lon": t["lon"],
                                 "status": statuses.get(label, "pending"),
+                                "pos": _nav_state(),
                             })
                     rec["_prev_counts"] = dict(detections)
 
@@ -340,8 +350,14 @@ def render_sitrep(rec: dict) -> bytes:
     c.setFillColor(INK)
     from detection import FLOOD_LABEL
     if mode == "flood" and FLOOD_LABEL in dets:
-        text = (f"Flood water observed; peak measured coverage in frame "
-                f"{max(e['count'] for e in rec.get('events', [{'count': dets['water %']}]))}%.")
+        floods = [e["count"] for e in rec.get("events", [])
+                  if e.get("label") == FLOOD_LABEL]
+        peak = max(floods) if floods else dets[FLOOD_LABEL]
+        conf = any(e.get("status") == "confirmed" for e in rec.get("events", [])
+                   if e.get("label") == FLOOD_LABEL)
+        text = (f"Flood water observed; peak measured coverage in frame {peak}%. "
+                + ("Operator-confirmed." if conf
+                   else "Not yet confirmed by the operator."))
     elif dets:
         ev = rec.get("events", [])
         ok = sorted({e["label"] for e in ev
@@ -422,6 +438,18 @@ def render_sitrep(rec: dict) -> bytes:
                  "POTWIERDZONE = operator potwierdzil / operator confirmed."
                  "  NIEPOTW. AI = tylko wskazanie AI / AI only.")
     yy -= 14
+
+    # observations made without a reliable position cannot be acted on the
+    # way located ones can - the report has to say so
+    bad_pos = [e for e in rec.get("events", []) if e.get("pos", "ok") != "ok"]
+    if bad_pos:
+        c.setFillColor(colors.HexColor("#c0392b"))
+        c.setFont("Courier", 8)
+        c.drawString(m, yy - 2,
+                     f"UWAGA: {len(bad_pos)} obserwacji zapisano przy "
+                     "niepewnej pozycji - wspolrzedne orientacyjne, "
+                     "nie zamykaja drogi.")
+        yy -= 13
 
     # route sketch (compact)
     box_h = 55 * mm

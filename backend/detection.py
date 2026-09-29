@@ -108,7 +108,14 @@ class VideoDetector:
         if now - self._alert_cooldown.get(label, 0) > 10:
             self._alert_cooldown[label] = now
             self._alert_seq += 1
+            try:
+                from navquality import nav
+                pos, pos_ok = nav.state, nav.usable
+            except Exception:
+                pos, pos_ok = "ok", True
             self.alerts.appendleft({
+                "pos": pos,
+                "pos_ok": pos_ok,
                 "id": self._alert_seq,
                 "ts": now,
                 "label": label,

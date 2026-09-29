@@ -632,11 +632,15 @@ async function refreshAlerts() {
       const verdict = st === "confirmed"
         ? `<span class="verdict ok">${t("st.confirmed")}</span>`
         : st === "rejected" ? `<span class="verdict no">${t("st.rejected")}</span>` : "";
+      // a finding observed without a reliable position is marked here,
+      // because it cannot be acted on the way a located one can
+      const posFlag = (a.pos && a.pos !== "ok")
+        ? `<span class="posflag ${a.pos}">${t("pos." + a.pos)}</span>` : "";
       return `<div class="alert-row st-${st}">
         <div class="ar-main"><span class="t">${t}</span>
           <span class="lab">${a.label} (x${a.count})</span> ${conf}</div>
         <div class="ar-sub"><span class="age">${alertAge(a.ts)}</span>
-          ${verdict}${controls}</div>
+          ${posFlag}${verdict}${controls}</div>
       </div>`;
     }).join("");
   } catch { /* backend not ready */ }
@@ -985,3 +989,40 @@ async function refreshRoads() {
 
 refreshRoads();
 setInterval(refreshRoads, 15000);
+
+/* --- Position quality ---
+   Detection confidence says how sure we are WHAT something is. This says
+   how sure we are WHERE it is. Without a reliable position a finding
+   cannot close a road, so the panel shows the consequence, not just a
+   label. */
+
+const NAV_COLOR = { ok: "#148a5c", degraded: "#9a6200", denied: "#c0392b" };
+
+async function refreshNav() {
+  try {
+    const n = await (await fetch("/api/nav")).json();
+    const el = document.getElementById("nav-state");
+    if (!el) return;
+    const label = (typeof LANG !== "undefined" && LANG === "en") ? n.label_en : n.label_pl;
+    const acc = n.accuracy_m != null ? ` &middot; ~${n.accuracy_m} m` : "";
+    el.innerHTML = `<b style="color:${NAV_COLOR[n.state]}">${label.toUpperCase()}</b>${acc}`
+      + (n.simulated ? ` <span class="sim">${t("simulated")}</span>` : "")
+      + (n.reason ? `<br><span class="hint">${n.reason}</span>` : "")
+      + (!n.usable ? `<br><span class="hint">${t("nav.downgraded")}</span>` : "");
+    document.querySelectorAll("#nav-controls button").forEach(b =>
+      b.classList.toggle("active", b.dataset.nav === n.state));
+  } catch { /* backend not ready */ }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const box = document.getElementById("nav-controls");
+  if (box && !VIEWER) box.addEventListener("click", async e => {
+    const b = e.target.closest("button[data-nav]");
+    if (!b) return;
+    await api("/api/nav", { state: b.dataset.nav, reason: "" });
+    refreshNav(); refreshRoads(); refreshAlerts();
+  });
+});
+
+refreshNav();
+setInterval(refreshNav, 5000);

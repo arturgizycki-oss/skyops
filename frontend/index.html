@@ -82,6 +82,19 @@
         <div id="zones" class="logs"></div>
       </div>
 
+      <div class="panel" id="nav-panel">
+        <h2 data-i18n="p.nav">Jakość pozycji</h2>
+        <div id="nav-state" class="nav-state">—</div>
+        <div class="btn-row" id="nav-controls">
+          <button data-nav="ok" class="btn" data-i18n="b.navok">GNSS OK</button>
+          <button data-nav="degraded" class="btn" data-i18n="b.navdeg">Zakłócenia</button>
+          <button data-nav="denied" class="btn danger" data-i18n="b.navden">Brak GNSS</button>
+        </div>
+        <p class="concept-note" data-i18n="nav.note">
+          Bez pewnej pozycji ustalenia nie zamykają drogi — spadają do „podejrzana".
+        </p>
+      </div>
+
       <div class="panel" id="roads-panel">
         <h2 data-i18n="p.roads">Przejezdność dróg</h2>
         <div id="roads-summary" class="hint" data-i18n="hint.nodata">Brak danych.</div>

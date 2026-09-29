@@ -23,6 +23,7 @@ from flight_log import recorder, render_pdf, render_sitrep
 from geofence import geofences
 from hydro import hydro
 from roads import network as roadnet
+from navquality import nav
 from detection import FLOOD_LABEL
 from sim import SimEngine, Waypoint
 from swarm import swarm
@@ -357,6 +358,46 @@ def road_status(log: str | None = None):
     result["observations"] = len(obs)
     result["summary"] = roadnet.impassable_summary(obs)
     return result
+
+
+@app.get("/api/logs/{log_id}/lowband")
+def log_lowband(log_id: str):
+    """The sortie's findings packed small enough for a narrow radio link.
+
+    Proves the platform's own claim: we do not move footage, we move the
+    answer - and an answer fits where video never could.
+    """
+    rec = recorder.get(log_id)
+    if not rec:
+        raise HTTPException(404, "log not found")
+    from lowband import report
+    obs = _flood_observations(log_id)
+    roads = roadnet.assess(obs) if roadnet.loaded else None
+    return report(rec, roads, hydro.triggered())
+
+
+class NavIn(BaseModel):
+    state: str = Field(pattern="^(ok|degraded|denied)$")
+    reason: str = Field(default="", max_length=120)
+
+
+@app.get("/api/nav")
+def nav_status():
+    """How reliable the platform's own position is right now."""
+    return nav.picture()
+
+
+@app.post("/api/nav")
+def nav_set(body: NavIn):
+    """Set position quality. Demonstration control.
+
+    A real installation reads this from the GNSS receiver. Here it is
+    set by hand and flagged `simulated`, so the degraded behaviour can
+    be shown without waiting for interference.
+    """
+    if not nav.set(body.state, body.reason):
+        raise HTTPException(400, "unknown state")
+    return nav.picture()
 
 
 @app.get("/api/hydro")
