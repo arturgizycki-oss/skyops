@@ -1,5 +1,16 @@
+# Core web server
 fastapi>=0.110
 uvicorn[standard]>=0.29
-# AI video detection (optional but recommended for the full demo)
+
+# PDF reports (flight reports and Situation Reports)
+reportlab>=4.0
+
+# Map tile caching proxy
+requests>=2.31
+
+# AI video detection (needed for the Search / Fire / Flood camera modes)
 ultralytics>=8.2
 opencv-python>=4.9
+
+# Real PX4 aircraft over MAVLink - only needed if you set SKYOPS_MAVLINK_URL
+# mavsdk>=1.4
