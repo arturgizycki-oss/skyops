@@ -58,8 +58,12 @@ koloru i faktury, bez uczenia maszynowego.
 - Nagrania testowe z drona: [Mixkit](https://mixkit.co), licencja Mixkit
   Free License. Powódź: klip #9953. Pożar: klip #11028.
   Obraz powodzi to materiał przykładowy, nie nagranie z Podkarpacia.
+- Piktogramy do prezentacji (osoba, osoba ze znakiem obrony cywilnej, dron,
+  dłoń z monetą, budynek, sygnał) oraz kod QR (getskyops.com):
+  materiał własny, autor Jan Pieprzycki. Pliki: [hackathon/grafiki/](hackathon/grafiki/).
+- Zrzuty ekranu platformy: materiał własny.
 - Znak Państwowej Straży Pożarnej: użyty wyłącznie, aby wskazać docelowego
   użytkownika. SkyOps nie jest produktem PSP ani przez nią rekomendowany.
 - LoRa® jest znakiem towarowym Semtech Corporation. Zdjęcie modułu SX1276
-  ilustruje kanał łączności z planu rozwoju.
-- Zrzuty ekranu platformy i kod QR (getskyops.com): materiał własny.
+  ilustruje kanał łączności z planu rozwoju. Obu nie publikujemy
+  w repozytorium, bo nie są naszym materiałem.
